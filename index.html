@@ -10,13 +10,15 @@
         h2 { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 40px; flex-wrap: wrap; }
         .container { max-width: 1350px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         
-        .top-bar { background: #343a40; color: white; padding: 15px; text-align: center; border-radius: 8px; margin-bottom: 20px; font-size: 16px; font-weight: bold; }
+        .top-bar { background: #343a40; color: white; padding: 15px; text-align: center; border-radius: 8px; margin-bottom: 10px; font-size: 16px; font-weight: bold; }
         .top-bar select { font-size: 16px; padding: 5px; border-radius: 5px; border: 2px solid #ffc107; font-weight: bold; cursor: pointer; }
+
+        .test-panel { background: #fff3cd; color: #856404; padding: 10px; text-align: center; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffeeba; font-size: 14px; }
+        .test-panel input, .test-panel button { font-size: 14px; padding: 5px; margin: 0 5px; }
 
         .players-section { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;}
         input[type="text"], input[type="number"], select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
         input[type="number"] { width: 45px; font-weight: bold; }
-        input[type="number"]:disabled { background: #eee; color: #555; border: none;}
         select.adv-select { font-size: 10px; padding: 2px; margin-top: 5px; width: 100%; background: #d4edda; border-color: #28a745;}
         .player-input { font-weight: bold; color: #d9534f; }
 
@@ -80,6 +82,15 @@
                 <option value="p3">Jogador 3</option>
                 <option value="p4">Jogador 4</option>
             </select>
+        </div>
+
+        <div class="test-panel">
+            <b>⏱️ MÁQUINA DO TEMPO (Modo de Teste)</b><br>
+            <small>Finge que estás no futuro para veres as apostas a serem trancadas e reveladas automaticamente (Hora de NY/EST).</small><br>
+            <input type="datetime-local" id="time-machine-input">
+            <button onclick="window.setTimeMachine()">Viajar no Tempo</button>
+            <button onclick="window.resetTimeMachine()">Voltar ao Presente</button>
+            <div id="current-time-display" style="font-weight:bold; margin-top:5px;"></div>
         </div>
 
         <h1>🏆 Predictor Mundial 2026</h1>
@@ -232,19 +243,48 @@
     let actualStandings = {};
     let state = { actual: {}, preds: {}, names: ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"] };
 
+    // --- MÁQUINA DO TEMPO ---
+    window.fakeTime = null;
+
+    window.setTimeMachine = function() {
+        let val = document.getElementById('time-machine-input').value;
+        if(val) {
+            window.fakeTime = val;
+            document.getElementById('current-time-display').innerText = "🕰️ A simular data/hora: " + new Date(val).toLocaleString();
+            window.renderApp();
+        }
+    }
+
+    window.resetTimeMachine = function() {
+        window.fakeTime = null;
+        document.getElementById('time-machine-input').value = "";
+        document.getElementById('current-time-display').innerText = "Hora Atual (Presente)";
+        window.renderApp();
+    }
+
+    // Função que calcula se o jogo já começou
+    window.isMatchStarted = function(dateStr, timeStr) {
+        let months = { "Jan":"01", "Feb":"02", "Mar":"03", "Apr":"04", "May":"05", "Jun":"06", "Jul":"07", "Aug":"08", "Sep":"09", "Oct":"10", "Nov":"11", "Dec":"12" };
+        let parts = dateStr.split('-');
+        let matchIso = `20${parts[2]}-${months[parts[1]]}-${parts[0].padStart(2,'0')}T${timeStr}:00`;
+        
+        // Assumindo que a hora no JSON é EST (-04:00 para o verão de NY)
+        let matchDate = new Date(matchIso + "-04:00");
+        let now = window.fakeTime ? new Date(window.fakeTime + "-04:00") : new Date();
+        
+        return now >= matchDate;
+    };
+    // -------------------------
+
     get(dbRef).then((snap) => {
         if(snap.exists()) state = snap.val();
-        
-        // CORREÇÃO CRÍTICA: Impedir que o Firebase apague as estruturas se estiverem vazias
         if(!state.actual) state.actual = {};
         if(!state.preds) state.preds = {};
         ['p1', 'p2', 'p3', 'p4'].forEach(p => { if(!state.preds[p]) state.preds[p] = {}; });
         if(!state.names) state.names = ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"];
-        
         init();
     }).catch((e) => {
         console.error(e);
-        // Prevenir erro se a net for abaixo
         if(!state.actual) state.actual = {};
         if(!state.preds) state.preds = { p1:{}, p2:{}, p3:{}, p4:{} };
         init();
@@ -253,6 +293,8 @@
     function init() {
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('app-content').style.display = 'block';
+        window.resetTimeMachine();
+        
         ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => {
             let input = document.getElementById(`${p}-name`);
             input.value = state.names[i];
@@ -260,14 +302,6 @@
         });
         window.renderApp();
     }
-
-    // --- FUNÇÃO PARA VERIFICAR A HORA DO JOGO ---
-    window.isMatchStarted = function(dateStr, timeStr) {
-        let months = { "Jan":"01", "Feb":"02", "Mar":"03", "Apr":"04", "May":"05", "Jun":"06", "Jul":"07", "Aug":"08", "Sep":"09", "Oct":"10", "Nov":"11", "Dec":"12" };
-        let parts = dateStr.split('-');
-        let isoStr = `20${parts[2]}-${months[parts[1]]}-${parts[0].padStart(2,'0')}T${timeStr}:00-04:00`; // EST time
-        return new Date() >= new Date(isoStr);
-    };
 
     window.toggleSection = id => document.getElementById(id).classList.toggle('hidden');
 
@@ -364,13 +398,19 @@
     }
 
     function matchHTML(m) {
-        let t1 = m.isKO ? resolve(m.t1_ref) : m.t1, t2 = m.isKO ? resolve(m.t2_ref) : m.t2;
-        let act = state.actual[m.id] || {g1:"", g2:"", adv:""}, isTie = m.isKO && act.g1 !== "" && act.g1 === act.g2;
+        let t1 = m.isKO ? resolve(m.t1_ref) : m.t1;
+        let t2 = m.isKO ? resolve(m.t2_ref) : m.t2;
+        let t1Class = t1.includes("(") ? "team-name tbd" : "team-name";
+        let t2Class = t2.includes("(") ? "team-name away tbd" : "team-name away";
+        let matchHeader = m.isKO ? `${m.date} | ${m.time} EST | ${m.venue} | ID: ${m.id}` : `Grupo ${m.group} | ${m.time} EST | ${m.venue} | ID: ${m.id}`;
+        
+        let act = state.actual[m.id] || {g1:"", g2:"", adv:""};
+        let isTie = m.isKO && act.g1 !== "" && act.g1 === act.g2;
         
         let started = window.isMatchStarted(m.date, m.time);
         let currentUser = document.getElementById('current-user').value;
         
-        // Resultados Reais (Só Admin pode editar)
+        // Render Resultados Reais
         let actualHtml = '';
         if (currentUser === 'admin') {
             actualHtml = `
@@ -388,16 +428,14 @@
             ${isTie && act.adv ? `<div style="font-size:10px; background:#d4edda; padding:2px; border-radius:3px;">P: ${act.adv=='t1'?t1.substring(0,4):t2.substring(0,4)}</div>` : ''}`;
         }
 
-        // Palpites dos Jogadores
+        // Render Palpites Jogadores
         let playersHtml = ['p1','p2','p3','p4'].map(p => {
             let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
             let pTie = m.isKO && pr.g1 !== "" && pr.g1 == pr.g2;
-            let canEdit = (!started && currentUser === p);
-            let canView = (started || currentUser === p || currentUser === 'admin'); // Admin só vê se já tiver começado ou se quiseres deixar o admin ver tudo, mudei para ver só o dele. Para ser justo, o Admin também só vê depois do jogo começar!
             
-            if(currentUser === 'admin') canView = started; // Admin só vê palpites dos outros após o jogo começar!
-            if(currentUser === p) canView = true;
-
+            let canEdit = (!started && currentUser === p);
+            let canView = (started || currentUser === p); 
+            
             let predContent = '';
             if (canEdit) {
                 predContent = `
@@ -411,7 +449,7 @@
                     <option value="t2" ${pr.adv=='t2'?'selected':''}>Equipa 2</option>
                 </select>`:''}`;
             } else if (canView) {
-                predContent = `<div style="font-size:14px; padding: 5px;"><b>${pr.g1!==""?pr.g1:'-'}</b> - <b>${pr.g2!==""?pr.g2:'-'}</b></div>
+                predContent = `<div style="font-size:14px; padding: 5px; background: #e9ecef; border-radius:4px; width:100%; text-align:center;"><b>${pr.g1!==""?pr.g1:'-'}</b> - <b>${pr.g2!==""?pr.g2:'-'}</b></div>
                 ${pTie && pr.adv ? `<div style="font-size:10px; color:#555;">P: ${pr.adv=='t1'?'Eq.1':'Eq.2'}</div>` : ''}`;
             } else {
                 predContent = `<div class="hidden-pred">🔒 Oculto</div>`;
@@ -454,8 +492,8 @@
         }
     }
 
-    window.upA = (id, k, v) => { if(!state.actual[id]) state.actual[id]={g1:"",g2:"",adv:""}; state.actual[id][k]=v; window.renderGroups(); window.renderMatches(); window.renderKnockouts(); window.updateLeaderboard(); }
-    window.upP = (p, id, k, v) => { if(!state.preds[p][id]) state.preds[p][id]={g1:"",g2:"",adv:""}; state.preds[p][id][k]=v; if(parseInt(id.replace('M',''))<=72){ window.renderMatches(); if(document.getElementById('standings-view-select').value==p) window.renderGroups(); } else window.renderKnockouts(); window.updateLeaderboard(); }
+    window.upA = (id, k, v) => { if(!state.actual[id]) state.actual[id]={g1:"",g2:"",adv:""}; state.actual[id][k]=v; window.renderApp(); }
+    window.upP = (p, id, k, v) => { if(!state.preds[p][id]) state.preds[p][id]={g1:"",g2:"",adv:""}; state.preds[p][id][k]=v; window.renderApp(); }
 
     window.updateLeaderboard = function() {
         actualStandings = getStandings(state.actual); let aQ = getQ(actualStandings);
