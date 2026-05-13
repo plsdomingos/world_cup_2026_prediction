@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predictor Mundial 2026 - Online Edition</title>
+    <title>Predictor Mundial 2026 - Online Master</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
         h1, h2, h3 { color: #0056b3; text-align: center; }
@@ -20,7 +20,6 @@
         .leaderboard th, .leaderboard td { border: 1px solid #ddd; padding: 10px; text-align: center; }
         .leaderboard th { background-color: #0056b3; color: white; }
         
-        /* Layout dos Grupos */
         .groups-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .group-card { background: #fdfdfd; border: 1px solid #ddd; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .group-card h3 { margin-top: 0; background: #0056b3; color: white; padding: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center;}
@@ -31,7 +30,6 @@
         .standings-table .rank-1, .standings-table .rank-2 { background-color: #d4edda; font-weight: bold; } 
         .standings-table .rank-3 { background-color: #fff3cd; } 
 
-        /* Layout dos Jogos */
         .match-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
         .match-row { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px; background: #fff; border-radius: 5px; flex-wrap: wrap;}
         .match-row:nth-child(even) { background-color: #f9f9f9; }
@@ -47,34 +45,28 @@
         .player-pred { display: flex; flex-direction: column; align-items: center; font-size: 12px; min-width: 75px; }
         .points-awarded { font-weight: bold; color: green; margin-top: 3px; font-size: 11px;}
         
-        /* Botões */
         .actions { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
         button.btn-main { background-color: #28a745; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; }
         button.btn-main:hover { background-color: #218838; }
         button.reset { background-color: #dc3545; }
-        button.reset:hover { background-color: #c82333; }
         
-        .toggle-btn { font-size: 14px; cursor: pointer; padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; background: #eee; color: #333; font-weight: normal; }
-        .collapsible-header { background: #343a40; color: white; padding: 10px; border-radius: 5px; margin-top: 15px; text-align: center; font-weight: bold; cursor: pointer; user-select: none; }
+        .toggle-btn { font-size: 14px; cursor: pointer; padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; background: #eee; }
+        .collapsible-header { background: #343a40; color: white; padding: 10px; border-radius: 5px; margin-top: 15px; text-align: center; font-weight: bold; cursor: pointer; }
         .collapsible-header:hover { background: #23272b; }
         .final-header { background: #ffc107; color: black; }
-        
-        .collapsible-content { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
         .hidden { display: none !important; }
         
-        .view-select { font-size: 16px; padding: 5px; border-radius: 5px; border: 2px solid #0056b3; background: #fff; font-weight: bold; cursor: pointer; }
-        
-        #loading-screen { text-align: center; padding: 50px; font-size: 20px; font-weight: bold; color: #0056b3; }
+        #loading-screen { text-align: center; padding: 100px; font-size: 22px; font-weight: bold; color: #0056b3; }
         #app-content { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="loading-screen">A carregar dados da nuvem... ⚽</div>
+    <div id="loading-screen">A carregar dados do estádio... 🏟️⚽</div>
     
     <div id="app-content">
-        <h1>🏆 Predictor Mundial 2026 - Online</h1>
+        <h1>🏆 Predictor Mundial 2026</h1>
         
         <div class="players-section">
             <label>J1: <input type="text" id="p1-name" class="player-input" value="Jogador 1"></label>
@@ -90,43 +82,39 @@
                     <th>Pos</th>
                     <th>Jogador</th>
                     <th>Total Pts</th>
-                    <th>Pts Jogos<br><small>(Grupos)</small></th>
-                    <th>Pts Bónus<br><small>(Grupos Simulação)</small></th>
-                    <th>Pts Jogos<br><small>(Eliminatórias)</small></th>
-                    <th>Pts Bónus<br><small>(Melhor da Ronda)</small></th>
+                    <th>Pts Grupos<br><small>(Jogos)</small></th>
+                    <th>Pts Bónus<br><small>(Tabelas)</small></th>
+                    <th>Pts Elim.<br><small>(Jogos)</small></th>
+                    <th>Extra<br><small>(Mestre Ronda)</small></th>
                 </tr>
             </thead>
             <tbody id="leaderboard-body"></tbody>
         </table>
 
         <div class="actions">
-            <button class="btn-main" onclick="saveData()">💾 Guardar na Nuvem</button>
-            <button class="btn-main reset" onclick="resetData()">⚠️ Apagar Dados da Cloud</button>
+            <button class="btn-main" onclick="window.saveData()">💾 Guardar na Nuvem</button>
+            <button class="btn-main reset" onclick="window.resetData()">⚠️ Apagar Cloud</button>
         </div>
 
-        <h2>Classificações dos Grupos 
-            <select id="standings-view-select" class="view-select" onchange="renderGroups()">
-                <option value="actual">📊 Resultados Reais</option>
-                <option value="p1">👁️ Previsão: Jogador 1</option>
-                <option value="p2">👁️ Previsão: Jogador 2</option>
-                <option value="p3">👁️ Previsão: Jogador 3</option>
-                <option value="p4">👁️ Previsão: Jogador 4</option>
+        <h2>Classificações 
+            <select id="standings-view-select" onchange="window.renderGroups()" style="font-size:16px; font-weight:bold; border:2px solid #0056b3;">
+                <option value="actual">📊 Realidade</option>
+                <option value="p1">👁️ Previsão: J1</option>
+                <option value="p2">👁️ Previsão: J2</option>
+                <option value="p3">👁️ Previsão: J3</option>
+                <option value="p4">👁️ Previsão: J4</option>
             </select>
-            <button class="toggle-btn" onclick="toggleSection('groups-wrapper')">👁️ Mostrar/Ocultar</button>
+            <button class="toggle-btn" onclick="window.toggleSection('groups-wrapper')">👁️</button>
         </h2>
         <div id="groups-wrapper">
             <div id="groups-container" class="groups-grid"></div>
         </div>
 
-        <h2>Fase de Grupos <button class="toggle-btn" onclick="toggleSection('group-matches-wrapper')">👁️ Mostrar/Ocultar</button></h2>
-        <div id="group-matches-wrapper">
-            <div id="matches-container"></div>
-        </div>
+        <h2>Fase de Grupos <button class="toggle-btn" onclick="window.toggleSection('group-matches-wrapper')">👁️</button></h2>
+        <div id="group-matches-wrapper"><div id="matches-container"></div></div>
 
-        <h2>Fase a Eliminar <button class="toggle-btn" onclick="toggleSection('knockouts-wrapper')">👁️ Mostrar/Ocultar</button></h2>
-        <div id="knockouts-wrapper">
-            <div id="knockouts-container"></div>
-        </div>
+        <h2>Fase a Eliminar <button class="toggle-btn" onclick="window.toggleSection('knockouts-wrapper')">👁️</button></h2>
+        <div id="knockouts-wrapper"><div id="knockouts-container"></div></div>
     </div>
 </div>
 
@@ -134,11 +122,10 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 
-    // 1. Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAoX5lbW2kANsTHqH8dSPTddgjEtFoBCCs",
       authDomain: "worldcup2026fct.firebaseapp.com",
-      databaseURL: "https://worldcup2026fct-default-rtdb.europe-west1.firebasedatabase.app", // Adicionado o link da base de dados!
+      databaseURL: "https://worldcup2026fct-default-rtdb.firebaseio.com/", 
       projectId: "worldcup2026fct",
       storageBucket: "worldcup2026fct.firebasestorage.app",
       messagingSenderId: "305390518728",
@@ -147,11 +134,8 @@
 
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
-    const dbRef = ref(database, 'mundial_state'); // Este é o nosso "ficheiro" na nuvem
+    const dbRef = ref(database, 'wc2026_master_state');
 
-    // ==========================================
-    // ⚙️ CONFIGURAÇÃO DE PONTOS
-    // ==========================================
     const CONFIG = {
         GS_EXACT: 6, GS_GD: 4, GS_RESULT: 3, 
         BONUS_WINNER: 24, BONUS_RUNNERUP: 12, BONUS_BEST3RD: 8, BONUS_QUALIFIED: 8,
@@ -230,384 +214,166 @@
         { id: 'M103', date: '18-Jul-26', time: '17:00', venue: 'Hard Rock Stadium, Miami', t1_ref: 'L101', t2_ref: 'L102', phase: 'Third Place' }, { id: 'M104', date: '19-Jul-26', time: '15:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: 'W101', t2_ref: 'W102', phase: 'Final' }
     ].map(m => ({...m, isKO: true}));
 
-    let allMatches = [...matches, ...koMatches];
-    let actualStandings = {}; 
-    let state = { actual: {}, preds: { p1: {}, p2: {}, p3: {}, p4: {} }, names: ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"] };
+    let actualStandings = {};
+    let state = { actual: {}, preds: { p1: {}, p2: {}, p3: {}, p4: {} }, names: ["J1", "J2", "J3", "J4"] };
 
-    // 2. Ligar ao Firebase e iniciar a App
-    get(dbRef).then((snapshot) => {
-        if (snapshot.exists()) {
-            state = snapshot.val();
-            // Garantir que a estrutura existe caso a BD seja nova
-            if(!state.actual) state.actual = {};
-            if(!state.preds) state.preds = { p1: {}, p2: {}, p3: {}, p4: {} };
-            if(!state.names) state.names = ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"];
-        }
-        iniciarApp();
-    }).catch((error) => {
-        console.error("Erro a carregar dados:", error);
-        iniciarApp(); // Inicia na mesma mesmo se falhar a net
-    });
+    get(dbRef).then((snap) => {
+        if(snap.exists()) state = snap.val();
+        init();
+    }).catch(() => init());
 
-    function iniciarApp() {
+    function init() {
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('app-content').style.display = 'block';
-        
-        if(state.names && state.names.length === 4) {
-            ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => document.getElementById(`${p}-name`).value = state.names[i]);
-        }
-        
-        ['p1', 'p2', 'p3', 'p4'].forEach(p => {
-            document.getElementById(`${p}-name`).addEventListener('input', () => { updateLeaderboard(); window.updateDropdownNames(); });
-        });
-
-        window.updateDropdownNames();
-        renderGroups();
-        renderMatches();
-        renderKnockouts();
-        updateLeaderboard();
-    }
-
-    // 3. Expor as funções ao HTML (Como usamos 'type=module', é obrigatório)
-    window.toggleSection = function(id) {
-        const el = document.getElementById(id);
-        if(el.classList.contains('hidden')) el.classList.remove('hidden');
-        else el.classList.add('hidden');
-    }
-
-    window.updateDropdownNames = function() {
-        let select = document.getElementById('standings-view-select');
-        if(!select) return;
         ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => {
-            let name = document.getElementById(`${p}-name`).value;
-            select.options[i+1].text = `👁️ Previsão: ${name}`;
+            let input = document.getElementById(`${p}-name`);
+            input.value = state.names[i];
+            input.oninput = () => { updateLeaderboard(); updateDropdownNames(); };
         });
+        updateDropdownNames(); renderGroups(); renderMatches(); renderKnockouts(); updateLeaderboard();
     }
 
-    // Funções Core
-    function getStandings(dataSource) {
+    window.toggleSection = id => document.getElementById(id).classList.toggle('hidden');
+
+    function updateDropdownNames() {
+        const sel = document.getElementById('standings-view-select');
+        ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => sel.options[i+1].text = "👁️ Previsão: " + document.getElementById(`${p}-name`).value);
+    }
+
+    function getStandings(src) {
         let st = {};
-        for (let g in groups) { st[g] = groups[g].map(team => ({ name: team, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0 })); }
-        
+        for (let g in groups) st[g] = groups[g].map(t => ({ name: t, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0 }));
         matches.forEach(m => {
-            let data = dataSource[m.id];
-            if (data && data.g1 !== "" && data.g2 !== "") {
-                let g1 = parseInt(data.g1), g2 = parseInt(data.g2);
-                let t1 = st[m.group].find(t => t.name === m.t1);
-                let t2 = st[m.group].find(t => t.name === m.t2);
-                t1.p++; t2.p++;
-                t1.gf += g1; t1.ga += g2; t1.gd = t1.gf - t1.ga;
-                t2.gf += g2; t2.ga += g1; t2.gd = t2.gf - t2.ga;
-                if (g1 > g2) { t1.w++; t1.pts += 3; t2.l++; }
-                else if (g1 < g2) { t2.w++; t2.pts += 3; t1.l++; }
-                else { t1.d++; t2.d++; t1.pts += 1; t2.pts += 1; }
+            let d = src[m.id];
+            if (d && d.g1 !== "" && d.g2 !== "") {
+                let g1 = parseInt(d.g1), g2 = parseInt(d.g2), t1 = st[m.group].find(x => x.name === m.t1), t2 = st[m.group].find(x => x.name === m.t2);
+                t1.p++; t2.p++; t1.gf += g1; t1.ga += g2; t1.gd = t1.gf - t1.ga; t2.gf += g2; t2.ga += g1; t2.gd = t2.gf - t2.ga;
+                if (g1 > g2) { t1.w++; t1.pts += 3; t2.l++; } else if (g1 < g2) { t2.w++; t2.pts += 3; t1.l++; } else { t1.d++; t2.d++; t1.pts += 1; t2.pts += 1; }
             }
         });
         for (let g in st) st[g].sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
         return st;
     }
 
-    function getQualifiedStats(st) {
-        let thirds = [];
-        for(let g in st) { if(st[g][2].p > 0) thirds.push(st[g][2]); }
-        thirds.sort((a,b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
-        let top8 = thirds.slice(0,8).filter(t=>t.p>0).map(t=>t.name);
+    function getQ(st) {
+        let t3 = []; for(let g in st) if(st[g][2].p > 0) t3.push(st[g][2]);
+        t3.sort((a,b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+        let top8 = t3.slice(0,8).filter(x => x.p > 0).map(x => x.name);
         return {
-            winners: Object.keys(st).map(g => st[g][0].p>0 ? st[g][0].name : null).filter(x=>x),
-            runners: Object.keys(st).map(g => st[g][1].p>0 ? st[g][1].name : null).filter(x=>x),
-            bestThirds: top8,
-            allQual: [...Object.keys(st).map(g => st[g][0].p>0 ? st[g][0].name : null).filter(x=>x),
-                      ...Object.keys(st).map(g => st[g][1].p>0 ? st[g][1].name : null).filter(x=>x), ...top8]
+            w: Object.keys(st).map(g => st[g][0].p>0 ? st[g][0].name : null).filter(x=>x),
+            r: Object.keys(st).map(g => st[g][1].p>0 ? st[g][1].name : null).filter(x=>x),
+            t8: top8,
+            all: [...Object.keys(st).map(g => st[g][0].p>0 ? st[g][0].name : null).filter(x=>x), ...Object.keys(st).map(g => st[g][1].p>0 ? st[g][1].name : null).filter(x=>x), ...top8]
         };
     }
 
-    function resolveTeam(ref) {
+    function resolve(ref) {
         if (!ref) return "A Definir";
         if (ref.match(/^[12][A-L]$/)) {
             let pos = parseInt(ref[0]) - 1, grp = ref[1];
             return actualStandings[grp] && actualStandings[grp][pos].p > 0 ? actualStandings[grp][pos].name : `(${ref})`;
         }
         if (ref.startsWith('3_')) {
-            let thirds = [];
-            for(let g in actualStandings) thirds.push(actualStandings[g][2]);
-            thirds.sort((a,b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
-            let top8 = thirds.slice(0,8);
+            let t3 = []; for(let g in actualStandings) t3.push(actualStandings[g][2]);
+            t3.sort((a,b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+            let top8 = t3.slice(0,8);
             let idx = parseInt(ref.split('_')[1]);
             return top8[idx] && top8[idx].p > 0 ? top8[idx].name : "(Melhor 3º)";
         }
         if (ref.startsWith('W') || ref.startsWith('L')) {
-            let prevId = 'M' + ref.substring(1);
-            let act = state.actual[prevId];
-            let mInfo = koMatches.find(m => m.id === prevId);
+            let pid = 'M' + ref.substring(1), act = state.actual[pid], info = koMatches.find(x => x.id === pid);
             if (!act || act.g1 === "" || act.g2 === "") return `(${ref})`; 
-            let g1 = parseInt(act.g1), g2 = parseInt(act.g2);
-            let t1 = resolveTeam(mInfo.t1_ref), t2 = resolveTeam(mInfo.t2_ref);
-            let aAdv = g1 > g2 ? 't1' : (g2 > g1 ? 't2' : act.adv);
-            let winner = aAdv === 't1' ? t1 : (aAdv === 't2' ? t2 : `(${ref})`);
-            let loser = aAdv === 't1' ? t2 : (aAdv === 't2' ? t1 : `(${ref})`);
-            return ref.startsWith('W') ? winner : loser;
+            let g1 = parseInt(act.g1), g2 = parseInt(act.g2), t1 = resolve(info.t1_ref), t2 = resolve(info.t2_ref);
+            let adv = g1 > g2 ? 't1' : (g2 > g1 ? 't2' : act.adv);
+            let win = adv === 't1' ? t1 : (adv === 't2' ? t2 : `(${ref})`);
+            let los = adv === 't1' ? t2 : (adv === 't2' ? t1 : `(${ref})`);
+            return ref.startsWith('W') ? win : los;
         }
         return ref;
     }
 
-    window.renderGroups = function() {
+    window.renderGroups = () => {
         actualStandings = getStandings(state.actual);
-        let viewSource = document.getElementById('standings-view-select').value;
-        let displayStandings = viewSource === 'actual' ? actualStandings : getStandings(state.preds[viewSource]);
-        let isSimulation = viewSource !== 'actual';
-
+        let src = document.getElementById('standings-view-select').value;
+        let st = src === 'actual' ? actualStandings : getStandings(state.preds[src]);
         const container = document.getElementById('groups-container');
         container.innerHTML = '';
-
         for (let g in groups) {
-            let tableRows = displayStandings[g].map((t, i) => `
-                <tr class="${i === 0 ? 'rank-1' : (i === 1 ? 'rank-2' : (i === 2 ? 'rank-3' : ''))}">
-                    <td style="text-align:left;">${i+1}. ${t.name}</td>
-                    <td>${t.p}</td><td>${t.gd}</td><td>${t.pts}</td>
-                </tr>
-            `).join('');
-
-            let badge = isSimulation ? `<span style="background:#ffc107; color:#333; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">SIMULAÇÃO</span>` : ``;
-
-            container.innerHTML += `
-                <div class="group-card">
-                    <h3>Grupo ${g} ${badge}</h3>
-                    <table class="standings-table">
-                        <tr><th style="text-align:left;">Equipa</th><th>J</th><th>DG</th><th>Pts</th></tr>
-                        ${tableRows}
-                    </table>
-                </div>
-            `;
+            let rows = st[g].map((t, i) => `<tr class="${i<2?'rank-'+(i+1):i==2?'rank-3':''}"><td>${i+1}. ${t.name}</td><td>${t.p}</td><td>${t.gd}</td><td>${t.pts}</td></tr>`).join('');
+            container.innerHTML += `<div class="group-card"><h3>Grupo ${g} ${src!=='actual'?'<small>(Sim)</small>':''}</h3><table class="standings-table"><tr><th>Equipa</th><th>J</th><th>DG</th><th>Pts</th></tr>${rows}</table></div>`;
         }
     }
 
-    function calculateMatchPoints(m, p) {
-        let act = state.actual[m.id], pred = state.preds[p][m.id];
-        if (!act || act.g1 === "" || act.g2 === "" || !pred || pred.g1 === "" || pred.g2 === "") return 0;
-
-        let a1 = parseInt(act.g1), a2 = parseInt(act.g2);
-        let p1 = parseInt(pred.g1), p2 = parseInt(pred.g2);
-
-        let exact = (a1 === p1 && a2 === p2);
-        let gd = ((p1 - p2) === (a1 - a2));
-        let result = (Math.sign(p1 - p2) === Math.sign(a1 - a2));
-
-        if(!m.isKO) {
-            if(exact) return CONFIG.GS_EXACT;
-            if(gd) return CONFIG.GS_GD;
-            if(result) return CONFIG.GS_RESULT;
-            return 0;
-        } else {
-            if(exact) return CONFIG.KO_EXACT[m.phase];
-            if(gd) return CONFIG.KO_GD[m.phase];
-            if(result) return CONFIG.KO_RESULT[m.phase];
-            return 0;
-        }
+    function calcPts(m, p) {
+        let act = state.actual[m.id], prd = state.preds[p][m.id];
+        if (!act || act.g1 === "" || act.g2 === "" || !prd || prd.g1 === "" || prd.g2 === "") return 0;
+        let a1 = parseInt(act.g1), a2 = parseInt(act.g2), p1 = parseInt(prd.g1), p2 = parseInt(prd.g2);
+        if (a1 === p1 && a2 === p2) return m.isKO ? CONFIG.KO_EXACT[m.phase] : CONFIG.GS_EXACT;
+        if ((p1 - p2) === (a1 - a2)) return m.isKO ? CONFIG.KO_GD[m.phase] : CONFIG.GS_GD;
+        if (Math.sign(p1 - p2) === Math.sign(a1 - a2)) return m.isKO ? CONFIG.KO_RESULT[m.phase] : CONFIG.GS_RESULT;
+        return 0;
     }
 
-    function generateMatchHTML(m) {
-        let t1 = m.isKO ? resolveTeam(m.t1_ref) : m.t1;
-        let t2 = m.isKO ? resolveTeam(m.t2_ref) : m.t2;
-        let t1Class = t1.includes("(") ? "team-name tbd" : "team-name";
-        let t2Class = t2.includes("(") ? "team-name away tbd" : "team-name away";
-        let matchHeader = m.isKO ? `${m.date} | ${m.time} EST | ${m.venue} | ID: ${m.id}` : `Grupo ${m.group} | ${m.time} EST | ${m.venue} | ID: ${m.id}`;
-        
-        let actG1 = state.actual[m.id]?.g1 ?? "", actG2 = state.actual[m.id]?.g2 ?? "";
-        let isTie = m.isKO && actG1 !== "" && actG2 !== "" && actG1 === actG2;
-
-        return `
-        <div class="match-row">
-            <div class="match-info">${matchHeader}</div>
-            <div class="${t1Class}">${t1}</div>
-            
-            <div class="score-box actual">
-                <div class="score-inputs">
-                    <input type="number" min="0" onchange="window.updateActual('${m.id}', 'g1', this.value)" value="${actG1}">
-                    -
-                    <input type="number" min="0" onchange="window.updateActual('${m.id}', 'g2', this.value)" value="${actG2}">
-                </div>
-                ${isTie ? `
-                <select class="adv-select" onchange="window.updateActual('${m.id}', 'adv', this.value)">
-                    <option value="">(Penáltis)</option>
-                    <option value="t1" ${state.actual[m.id]?.adv==='t1'?'selected':''}>Passa ${t1.substring(0,4)}</option>
-                    <option value="t2" ${state.actual[m.id]?.adv==='t2'?'selected':''}>Passa ${t2.substring(0,4)}</option>
-                </select>` : ''}
-            </div>
-            
-            <div class="${t2Class}">${t2}</div>
-            
-            <div style="display:flex; gap: 10px; margin-left: auto;">
-                ${['p1', 'p2', 'p3', 'p4'].map((p, i) => {
-                    let pg1 = state.preds[p][m.id]?.g1 ?? "";
-                    let pg2 = state.preds[p][m.id]?.g2 ?? "";
-                    let pTie = m.isKO && pg1 !== "" && pg2 !== "" && pg1 === pg2;
-                    return `
-                    <div class="player-pred">
-                        <span>J${i+1}</span>
-                        <div class="score-inputs">
-                            <input type="number" min="0" onchange="window.updatePred('${p}', '${m.id}', 'g1', this.value)" value="${pg1}">
-                            -
-                            <input type="number" min="0" onchange="window.updatePred('${p}', '${m.id}', 'g2', this.value)" value="${pg2}">
-                        </div>
-                        ${pTie ? `
-                        <select class="adv-select" onchange="window.updatePred('${p}', '${m.id}', 'adv', this.value)">
-                            <option value="">Quem Passa?</option>
-                            <option value="t1" ${state.preds[p][m.id]?.adv==='t1'?'selected':''}>Equipa 1</option>
-                            <option value="t2" ${state.preds[p][m.id]?.adv==='t2'?'selected':''}>Equipa 2</option>
-                        </select>` : ''}
-                        <div class="points-awarded">${calculateMatchPoints(m, p)} pts</div>
-                    </div>`;
-                }).join('')}
-            </div>
-        </div>`;
+    function matchHTML(m) {
+        let t1 = m.isKO ? resolve(m.t1_ref) : m.t1, t2 = m.isKO ? resolve(m.t2_ref) : m.t2;
+        let act = state.actual[m.id] || {g1:"", g2:"", adv:""}, isTie = m.isKO && act.g1 !== "" && act.g1 === act.g2;
+        return `<div class="match-row"><div class="match-info">${m.date} | ${m.time} | ${m.venue} | ID: ${m.id}</div><div class="team-name ${t1.includes('(')?'tbd':''}">${t1}</div><div class="score-box actual"><div class="score-inputs"><input type="number" onchange="window.upA('${m.id}','g1',this.value)" value="${act.g1}">-<input type="number" onchange="window.upA('${m.id}','g2',this.value)" value="${act.g2}"></div>${isTie?`<select class="adv-select" onchange="window.upA('${m.id}','adv',this.value)"><option value="">Passa...</option><option value="t1" ${act.adv=='t1'?'selected':''}>${t1.substring(0,4)}</option><option value="t2" ${act.adv=='t2'?'selected':''}>${t2.substring(0,4)}</option></select>`:''}</div><div class="team-name away ${t2.includes('(')?'tbd':''}">${t2}</div><div style="display:flex;gap:5px;">${['p1','p2','p3','p4'].map(p=>{let pr=state.preds[p][m.id]||{g1:"",g2:"",adv:""};return `<div class="player-pred"><span>${p.toUpperCase()}</span><div class="score-inputs"><input type="number" onchange="window.upP('${p}','${m.id}','g1',this.value)" value="${pr.g1}">-<input type="number" onchange="window.upP('${p}','${m.id}','g2',this.value)" value="${pr.g2}"></div>${m.isKO&&pr.g1!=""&&pr.g1==pr.g2?`<select class="adv-select" onchange="window.upP('${p}','${m.id}','adv',this.value)"><option value="">P...</option><option value="t1" ${pr.adv=='t1'?'selected':''}>T1</option><option value="t2" ${pr.adv=='t2'?'selected':''}>T2</option></select>`:''}<div class="points-awarded">${calcPts(m,p)} pts</div></div>`}).join('')}</div></div>`;
     }
 
     function renderMatches() {
-        const container = document.getElementById('matches-container');
-        container.innerHTML = '';
-        let groupedByDate = {};
-        matches.forEach(m => { if(!groupedByDate[m.date]) groupedByDate[m.date] = []; groupedByDate[m.date].push(m); });
-
-        for(let date in groupedByDate) {
-            let idSafeDate = date.replace(/\//g, '-');
-            let html = `<div class="collapsible-header" onclick="window.toggleSection('date-${idSafeDate}')">📅 Dia ${date} ▼</div>`;
-            html += `<div id="date-${idSafeDate}" class="collapsible-content">`;
-            groupedByDate[date].forEach(m => html += generateMatchHTML(m));
-            html += `</div>`;
-            container.innerHTML += html;
+        const c = document.getElementById('matches-container'); c.innerHTML = '';
+        let groupsD = {}; matches.forEach(m => { if(!groupsD[m.date]) groupsD[m.date] = []; groupsD[m.date].push(m); });
+        for(let d in groupsD) {
+            let id = d.replace(/\//g,'-');
+            c.innerHTML += `<div class="collapsible-header" onclick="window.toggleSection('date-${id}')">📅 ${d}</div><div id="date-${id}" class="collapsible-content">${groupsD[d].map(matchHTML).join('')}</div>`;
         }
     }
 
     function renderKnockouts() {
-        const container = document.getElementById('knockouts-container');
-        container.innerHTML = '';
-        let groupedByPhase = {};
-        koMatches.forEach(m => { if(!groupedByPhase[m.phase]) groupedByPhase[m.phase] = []; groupedByPhase[m.phase].push(m); });
-
-        for(let phase in groupedByPhase) {
-            let idSafePhase = phase.replace(/\s/g, '-');
-            let finalClass = phase.includes('Final') ? 'final-header' : '';
-            let html = `<div class="collapsible-header ${finalClass}" onclick="window.toggleSection('phase-${idSafePhase}')">🏆 ${phase} ▼</div>`;
-            html += `<div id="phase-${idSafePhase}" class="collapsible-content">`;
-            groupedByPhase[phase].forEach(m => html += generateMatchHTML(m));
-            html += `</div>`;
-            container.innerHTML += html;
+        const c = document.getElementById('knockouts-container'); c.innerHTML = '';
+        let groupsP = {}; koMatches.forEach(m => { if(!groupsP[m.phase]) groupsP[m.phase] = []; groupsP[m.phase].push(m); });
+        for(let p in groupsP) {
+            let id = p.replace(/\s/g,'-');
+            c.innerHTML += `<div class="collapsible-header ${p.includes('Final')?'final-header':''}" onclick="window.toggleSection('phase-${id}')">🏆 ${p}</div><div id="phase-${id}" class="collapsible-content">${groupsP[p].map(matchHTML).join('')}</div>`;
         }
     }
 
-    window.updateActual = function(matchId, prop, value) {
-        if(!state.actual[matchId]) state.actual[matchId] = {g1: "", g2: "", adv: ""};
-        state.actual[matchId][prop] = value;
-        if (state.actual[matchId].g1 !== state.actual[matchId].g2) state.actual[matchId].adv = ""; 
-        window.renderGroups(); renderMatches(); renderKnockouts(); updateLeaderboard();
-    }
-
-    window.updatePred = function(player, matchId, prop, value) {
-        if(!state.preds[player][matchId]) state.preds[player][matchId] = {g1: "", g2: "", adv: ""};
-        state.preds[player][matchId][prop] = value;
-        
-        if(parseInt(matchId.replace('M','')) <= 72) {
-            renderMatches();
-            if(document.getElementById('standings-view-select').value === player) window.renderGroups();
-        } else {
-            renderKnockouts();
-        }
-        updateLeaderboard();
-    }
+    window.upA = (id, k, v) => { if(!state.actual[id]) state.actual[id]={g1:"",g2:"",adv:""}; state.actual[id][k]=v; window.renderGroups(); renderMatches(); renderKnockouts(); updateLeaderboard(); }
+    window.upP = (p, id, k, v) => { if(!state.preds[p][id]) state.preds[p][id]={g1:"",g2:"",adv:""}; state.preds[p][id][k]=v; if(parseInt(id.replace('M',''))<=72){ renderMatches(); if(document.getElementById('standings-view-select').value==p) window.renderGroups(); } else renderKnockouts(); updateLeaderboard(); }
 
     function updateLeaderboard() {
-        actualStandings = getStandings(state.actual);
-        let actualQ = getQualifiedStats(actualStandings);
-        
-        let koPhaseBonus = { p1: 0, p2: 0, p3: 0, p4: 0 };
-        let phases = [...new Set(koMatches.map(m=>m.phase))];
-        phases.forEach(phase => {
-            let scores = { p1:0, p2:0, p3:0, p4:0 };
-            let inPhase = koMatches.filter(m=>m.phase===phase);
-            let resolvedCount = 0;
-            
-            inPhase.forEach(m => {
-                 let act = state.actual[m.id];
-                 if(!act || act.g1==="" || act.g2==="") return;
-                 let a1 = parseInt(act.g1), a2 = parseInt(act.g2);
-                 let aAdv = a1>a2 ? 't1' : (a1<a2 ? 't2' : act.adv);
-                 if(!aAdv) return;
-                 resolvedCount++;
-
-                 ['p1','p2','p3','p4'].forEach(p => {
-                     let pred = state.preds[p][m.id];
-                     if(!pred || pred.g1==="" || pred.g2==="") return;
-                     let p1 = parseInt(pred.g1), p2 = parseInt(pred.g2);
-                     let pAdv = p1>p2 ? 't1' : (p1<p2 ? 't2' : pred.adv);
-                     if(pAdv === aAdv) scores[p]++;
-                 });
+        actualStandings = getStandings(state.actual); let aQ = getQ(actualStandings);
+        let koB = {p1:0, p2:0, p3:0, p4:0};
+        [...new Set(koMatches.map(m=>m.phase))].forEach(ph => {
+            let sc = {p1:0, p2:0, p3:0, p4:0}, rCount = 0;
+            koMatches.filter(m=>m.phase==ph).forEach(m => {
+                let act = state.actual[m.id]; if(!act || act.g1==="" || act.g2==="") return;
+                let aA = act.g1>act.g2 ? 't1' : (act.g1<act.g2 ? 't2' : act.adv); if(!aA) return; rCount++;
+                ['p1','p2','p3','p4'].forEach(p => { let pr = state.preds[p][m.id]; if(pr && (pr.g1>pr.g2?'t1':(pr.g1<pr.g2?'t2':pr.adv)) == aA) sc[p]++; });
             });
-            
-            if (resolvedCount > 0) {
-                let uniqueScores = [...new Set(Object.values(scores))].sort((a,b)=>b-a);
-                let max = uniqueScores[0], second = uniqueScores[1];
-                ['p1','p2','p3','p4'].forEach(p => {
-                    if(scores[p] === max && max > 0) koPhaseBonus[p] += CONFIG.KO_EXTRA_1ST;
-                    else if(scores[p] === second && second > 0) koPhaseBonus[p] += CONFIG.KO_EXTRA_2ND;
-                });
+            if(rCount > 0) {
+                let uSc = [...new Set(Object.values(sc))].sort((a,b)=>b-a);
+                ['p1','p2','p3','p4'].forEach(p => { if(sc[p]==uSc[0] && uSc[0]>0) koB[p]+=CONFIG.KO_EXTRA_1ST; else if(sc[p]==uSc[1] && uSc[1]>0) koB[p]+=CONFIG.KO_EXTRA_2ND; });
             }
         });
 
-        let stats = ['p1', 'p2', 'p3', 'p4'].map((p) => {
-            let name = document.getElementById(`${p}-name`).value;
-            let gsPts = 0, koPts = 0;
-            
-            matches.forEach(m => gsPts += calculateMatchPoints(m, p));
-            koMatches.forEach(m => koPts += calculateMatchPoints(m, p));
+        let stats = ['p1','p2','p3','p4'].map(p => {
+            let gs=0, ko=0; matches.forEach(m=>gs+=calcPts(m,p)); koMatches.forEach(m=>ko+=calcPts(m,p));
+            let pS = getStandings(state.preds[p]), pQ = getQ(pS), b=0;
+            for(let g in groups) { if(actualStandings[g][0].p>0 && pS[g][0].name==actualStandings[g][0].name) b+=CONFIG.BONUS_WINNER; if(actualStandings[g][1].p>0 && pS[g][1].name==actualStandings[g][1].name) b+=CONFIG.BONUS_RUNNERUP; }
+            pQ.t8.forEach(t => { if(aQ.t8.includes(t)) b+=CONFIG.BONUS_BEST3RD; });
+            pQ.all.forEach(t => { if(aQ.all.includes(t)) b+=CONFIG.BONUS_QUALIFIED; });
+            return { n: document.getElementById(p+'-name').value, gs, b, ko, extra: koB[p], tot: gs+b+ko+koB[p] };
+        }).sort((a,b) => b.tot - a.tot);
 
-            let pSt = getStandings(state.preds[p]);
-            let pQ = getQualifiedStats(pSt);
-            let gsBonus = 0;
-            
-            for(let g in groups) {
-                if(actualStandings[g][0].p > 0 && pSt[g][0].name === actualStandings[g][0].name) gsBonus += CONFIG.BONUS_WINNER;
-                if(actualStandings[g][1].p > 0 && pSt[g][1].name === actualStandings[g][1].name) gsBonus += CONFIG.BONUS_RUNNERUP;
-            }
-            pQ.bestThirds.forEach(t => { if(actualQ.bestThirds.includes(t)) gsBonus += CONFIG.BONUS_BEST3RD; });
-            pQ.allQual.forEach(t => { if(actualQ.allQual.includes(t)) gsBonus += CONFIG.BONUS_QUALIFIED; });
-
-            let totalPtsGeral = gsPts + gsBonus + koPts + koPhaseBonus[p];
-            return { name, gsPts, gsBonus, koPts, koExtra: koPhaseBonus[p], totalPtsGeral };
-        });
-
-        stats.sort((a, b) => b.totalPtsGeral - a.totalPtsGeral);
-
-        document.getElementById('leaderboard-body').innerHTML = stats.map((s, i) => `
-            <tr>
-                <td><b>${i+1}º</b></td>
-                <td><b>${s.name}</b></td>
-                <td style="font-size:18px; color:#d9534f;"><b>${s.totalPtsGeral}</b></td>
-                <td>${s.gsPts}</td>
-                <td><b style="color:green;">+${s.gsBonus}</b></td>
-                <td>${s.koPts}</td>
-                <td><b style="color:green;">+${s.koExtra}</b></td>
-            </tr>
-        `).join('');
+        document.getElementById('leaderboard-body').innerHTML = stats.map((s,i) => `<tr><td>${i+1}º</td><td>${s.n}</td><td><b>${s.tot}</b></td><td>${s.gs}</td><td>+${s.b}</td><td>${s.ko}</td><td>+${s.extra}</td></tr>`).join('');
     }
 
-    // 4. Funções de Escrita no Firebase
-    window.saveData = function() {
-        state.names = ['p1', 'p2', 'p3', 'p4'].map(p => document.getElementById(`${p}-name`).value);
-        set(dbRef, state).then(() => {
-            alert("Progresso guardado na NUVEM com sucesso!");
-        }).catch((error) => {
-            alert("Erro ao guardar na nuvem: " + error);
-        });
+    window.saveData = () => {
+        state.names = ['p1','p2','p3','p4'].map(p => document.getElementById(p+'-name').value);
+        set(dbRef, state).then(() => alert("Dados na Nuvem! ☁️")).catch(e => alert("Erro: " + e));
     }
-
-    window.resetData = function() {
-        if(confirm("Apagar TODOS os palpites da base de dados partilhada? Esta ação não tem volta!")) {
-            state = { actual: {}, preds: { p1: {}, p2: {}, p3: {}, p4: {} }, names: ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"] };
-            set(dbRef, state).then(() => {
-                location.reload();
-            });
-        }
-    }
+    window.resetData = () => confirm("Apagar TUDO?") && set(dbRef, null).then(() => location.reload());
 </script>
 
 </body>
