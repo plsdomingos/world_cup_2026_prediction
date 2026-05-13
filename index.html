@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictor Mundial 2026 - Fantasy Master</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+        h1, h2, h3 { color: #0056b3; text-align: center; }
+        h2 { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 40px; flex-wrap: wrap; }
+        .container { max-width: 1350px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        
+        .players-section { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;}
+        input[type="text"], input[type="number"], select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
+        input[type="number"] { width: 40px; font-weight: bold; }
+        select.adv-select { font-size: 10px; padding: 2px; margin-top: 5px; width: 100%; background: #d4edda; border-color: #28a745;}
+        .player-input { font-weight: bold; color: #d9534f; }
+
+        .leaderboard { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px; }
+        .leaderboard th, .leaderboard td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        .leaderboard th { background-color: #0056b3; color: white; }
+        
+        /* Layout dos Grupos */
+        .groups-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .group-card { background: #fdfdfd; border: 1px solid #ddd; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .group-card h3 { margin-top: 0; background: #0056b3; color: white; padding: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center;}
+        
+        .standings-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .standings-table th, .standings-table td { border: 1px solid #ddd; padding: 5px; text-align: center; }
+        .standings-table th { background: #e9ecef; }
+        .standings-table .rank-1, .standings-table .rank-2 { background-color: #d4edda; font-weight: bold; } 
+        .standings-table .rank-3 { background-color: #fff3cd; } 
+
+        /* Layout dos Jogos */
+        .match-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
+        .match-row { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px; background: #fff; border-radius: 5px; flex-wrap: wrap;}
+        .match-row:nth-child(even) { background-color: #f9f9f9; }
+        .match-info { width: 100%; text-align: center; font-size: 11px; color: #777; margin-bottom: 5px; font-weight: bold; }
+        .team-name { width: 110px; text-align: right; font-weight: bold; font-size: 14px; }
+        .team-name.away { text-align: left; }
+        .team-name.tbd { color: #aaa; font-style: italic; }
+        
+        .score-box { display: flex; flex-direction: column; align-items: center; gap: 2px; background: #e9ecef; padding: 5px 10px; border-radius: 5px; }
+        .score-box.actual { background: #ffeeba; border: 1px solid #ffc107; }
+        .score-inputs { display: flex; align-items: center; gap: 5px; }
+        
+        .player-pred { display: flex; flex-direction: column; align-items: center; font-size: 12px; min-width: 75px; }
+        .points-awarded { font-weight: bold; color: green; margin-top: 3px; font-size: 11px;}
+        
+        /* Botões */
+        .actions { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        button.btn-main { background-color: #28a745; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; }
+        button.btn-main:hover { background-color: #218838; }
+        button.reset { background-color: #dc3545; }
+        button.reset:hover { background-color: #c82333; }
+        
+        .toggle-btn { font-size: 14px; cursor: pointer; padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; background: #eee; color: #333; font-weight: normal; }
+        .collapsible-header { background: #343a40; color: white; padding: 10px; border-radius: 5px; margin-top: 15px; text-align: center; font-weight: bold; cursor: pointer; user-select: none; }
+        .collapsible-header:hover { background: #23272b; }
+        .final-header { background: #ffc107; color: black; }
+        
+        .collapsible-content { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .hidden { display: none !important; }
+        
+        .view-select { font-size: 16px; padding: 5px; border-radius: 5px; border: 2px solid #0056b3; background: #fff; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏆 Predictor Mundial 2026 - Master</h1>
+    
+    <div class="players-section">
+        <label>J1: <input type="text" id="p1-name" class="player-input" value="Jogador 1"></label>
+        <label>J2: <input type="text" id="p2-name" class="player-input" value="Jogador 2"></label>
+        <label>J3: <input type="text" id="p3-name" class="player-input" value="Jogador 3"></label>
+        <label>J4: <input type="text" id="p4-name" class="player-input" value="Jogador 4"></label>
+    </div>
+
+    <h2>Tabela Classificativa</h2>
+    <table class="leaderboard">
+        <thead>
+            <tr>
+                <th>Pos</th>
+                <th>Jogador</th>
+                <th>Total Pts</th>
+                <th>Pts Jogos<br><small>(Grupos)</small></th>
+                <th>Pts Bónus<br><small>(Grupos Simulação)</small></th>
+                <th>Pts Jogos<br><small>(Eliminatórias)</small></th>
+                <th>Pts Bónus<br><small>(Melhor da Ronda)</small></th>
+            </tr>
+        </thead>
+        <tbody id="leaderboard-body"></tbody>
+    </table>
+
+    <div class="actions">
+        <button class="btn-main" onclick="saveData()">💾 Guardar Progresso</button>
+        <button class="btn-main reset" onclick="resetData()">⚠️ Apagar Tudo</button>
+    </div>
+
+    <h2>Classificações dos Grupos 
+        <select id="standings-view-select" class="view-select" onchange="renderGroups()">
+            <option value="actual">📊 Resultados Reais</option>
+            <option value="p1">👁️ Previsão: Jogador 1</option>
+            <option value="p2">👁️ Previsão: Jogador 2</option>
+            <option value="p3">👁️ Previsão: Jogador 3</option>
+            <option value="p4">👁️ Previsão: Jogador 4</option>
+        </select>
+        <button class="toggle-btn" onclick="toggleSection('groups-wrapper')">👁️ Mostrar/Ocultar</button>
+    </h2>
+    <div id="groups-wrapper">
+        <div id="groups-container" class="groups-grid"></div>
+    </div>
+
+    <h2>Fase de Grupos <button class="toggle-btn" onclick="toggleSection('group-matches-wrapper')">👁️ Mostrar/Ocultar</button></h2>
+    <div id="group-matches-wrapper">
+        <div id="matches-container"></div>
+    </div>
+
+    <h2>Fase a Eliminar <button class="toggle-btn" onclick="toggleSection('knockouts-wrapper')">👁️ Mostrar/Ocultar</button></h2>
+    <div id="knockouts-wrapper">
+        <div id="knockouts-container"></div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // ⚙️ CONFIGURAÇÃO DE PONTOS (FÁCIL EDIÇÃO)
+    // ==========================================
+    const CONFIG = {
+        // Pontos Fase de Grupos
+        GS_EXACT: 6,
+        GS_GD: 4,
+        GS_RESULT: 3, 
+
+        // Pontos Bónus Simulação de Grupos
+        BONUS_WINNER: 24,
+        BONUS_RUNNERUP: 12,
+        BONUS_BEST3RD: 8,
+        BONUS_QUALIFIED: 8,
+
+        // Pontos Fase a Eliminar (Por Ronda)
+        KO_EXACT:  { 'Round of 32': 6, 'Round of 16': 12, 'Quarter-finals': 24, 'Semi-finals': 48, 'Third Place': 48, 'Final': 96 },
+        KO_GD:     { 'Round of 32': 4, 'Round of 16': 8,  'Quarter-finals': 16, 'Semi-finals': 32, 'Third Place': 32, 'Final': 64 },
+        KO_RESULT: { 'Round of 32': 3, 'Round of 16': 6,  'Quarter-finals': 12, 'Semi-finals': 24, 'Third Place': 24, 'Final': 48 },
+
+        // Bónus Extra por acertar mais equipas a passar numa Ronda
+        KO_EXTRA_1ST: 10,
+        KO_EXTRA_2ND: 5
+    };
+    // ==========================================
+
+    const groups = {
+        A: ["Mexico", "South Africa", "South Korea", "Czechia"], B: ["Canada", "Bosnia and Herzegovina", "Qatar", "Switzerland"],
+        C: ["Brazil", "Morocco", "Haiti", "Scotland"], D: ["USA", "Paraguay", "Australia", "Türkiye"],
+        E: ["Germany", "Curaçao", "Ivory Coast", "Ecuador"], F: ["Netherlands", "Japan", "Sweden", "Tunisia"],
+        G: ["Belgium", "Egypt", "Iran", "New Zealand"], H: ["Spain", "Cape Verde", "Saudi Arabia", "Uruguay"],
+        I: ["France", "Senegal", "Iraq", "Norway"], J: ["Argentina", "Algeria", "Austria", "Jordan"],
+        K: ["Portugal", "Congo DR", "Uzbekistan", "Colombia"], L: ["England", "Croatia", "Ghana", "Panama"]
+    };
+
+    const rawMatches = [
+        ["A", "11-Jun-26", "Mexico", "South Africa", "15:00", "Estadio Azteca, Mexico City"],
+        ["A", "11-Jun-26", "South Korea", "Czechia", "22:00", "Estadio Akron, Guadalajara"],
+        ["B", "12-Jun-26", "Canada", "Bosnia and Herzegovina", "15:00", "BMO Field, Toronto"],
+        ["D", "12-Jun-26", "USA", "Paraguay", "21:00", "SoFi Stadium, Los Angeles"],
+        ["C", "13-Jun-26", "Haiti", "Scotland", "21:00", "Gillette Stadium, Boston"],
+        ["D", "13-Jun-26", "Australia", "Türkiye", "00:00", "BC Place, Vancouver"],
+        ["C", "13-Jun-26", "Brazil", "Morocco", "18:00", "MetLife Stadium, New York/New Jersey"],
+        ["B", "13-Jun-26", "Qatar", "Switzerland", "15:00", "Levi's Stadium, San Francisco Bay Area"],
+        ["E", "14-Jun-26", "Ivory Coast", "Ecuador", "19:00", "Lincoln Financial Field, Philadelphia"],
+        ["E", "14-Jun-26", "Germany", "Curaçao", "13:00", "NRG Stadium, Houston"],
+        ["F", "14-Jun-26", "Netherlands", "Japan", "16:00", "AT&T Stadium, Dallas"],
+        ["F", "14-Jun-26", "Sweden", "Tunisia", "22:00", "Estadio BBVA, Monterrey"],
+        ["H", "15-Jun-26", "Saudi Arabia", "Uruguay", "18:00", "Hard Rock Stadium, Miami"],
+        ["H", "15-Jun-26", "Spain", "Cape Verde", "12:00", "Mercedes-Benz Stadium, Atlanta"],
+        ["G", "15-Jun-26", "Iran", "New Zealand", "21:00", "SoFi Stadium, Los Angeles"],
+        ["G", "15-Jun-26", "Belgium", "Egypt", "15:00", "Lumen Field, Seattle"],
+        ["I", "16-Jun-26", "France", "Senegal", "15:00", "MetLife Stadium, New York/New Jersey"],
+        ["I", "16-Jun-26", "Iraq", "Norway", "18:00", "Gillette Stadium, Boston"],
+        ["J", "16-Jun-26", "Argentina", "Algeria", "21:00", "Arrowhead Stadium, Kansas City"],
+        ["J", "16-Jun-26", "Austria", "Jordan", "00:00", "Levi's Stadium, San Francisco Bay Area"],
+        ["L", "17-Jun-26", "Ghana", "Panama", "19:00", "BMO Field, Toronto"],
+        ["L", "17-Jun-26", "England", "Croatia", "16:00", "AT&T Stadium, Dallas"],
+        ["K", "17-Jun-26", "Portugal", "Congo DR", "13:00", "NRG Stadium, Houston"],
+        ["K", "17-Jun-26", "Uzbekistan", "Colombia", "22:00", "Estadio Azteca, Mexico City"],
+        ["A", "18-Jun-26", "Czechia", "South Africa", "12:00", "Mercedes-Benz Stadium, Atlanta"],
+        ["B", "18-Jun-26", "Switzerland", "Bosnia and Herzegovina", "15:00", "SoFi Stadium, Los Angeles"],
+        ["B", "18-Jun-26", "Canada", "Qatar", "18:00", "BC Place, Vancouver"],
+        ["A", "18-Jun-26", "Mexico", "South Korea", "21:00", "Estadio Akron, Guadalajara"],
+        ["C", "19-Jun-26", "Brazil", "Haiti", "21:00", "Lincoln Financial Field, Philadelphia"],
+        ["C", "19-Jun-26", "Scotland", "Morocco", "18:00", "Gillette Stadium, Boston"],
+        ["D", "19-Jun-26", "Türkiye", "Paraguay", "23:00", "Levi's Stadium, San Francisco Bay Area"],
+        ["D", "19-Jun-26", "USA", "Australia", "15:00", "Lumen Field, Seattle"],
+        ["E", "20-Jun-26", "Germany", "Ivory Coast", "16:00", "BMO Field, Toronto"],
+        ["E", "20-Jun-26", "Ecuador", "Curaçao", "20:00", "Arrowhead Stadium, Kansas City"],
+        ["F", "20-Jun-26", "Netherlands", "Sweden", "13:00", "NRG Stadium, Houston"],
+        ["F", "20-Jun-26", "Tunisia", "Japan", "00:00", "Estadio BBVA, Monterrey"],
+        ["H", "21-Jun-26", "Uruguay", "Cape Verde", "18:00", "Hard Rock Stadium, Miami"],
+        ["H", "21-Jun-26", "Spain", "Saudi Arabia", "12:00", "Mercedes-Benz Stadium, Atlanta"],
+        ["G", "21-Jun-26", "Belgium", "Iran", "15:00", "SoFi Stadium, Los Angeles"],
+        ["G", "21-Jun-26", "New Zealand", "Egypt", "21:00", "BC Place, Vancouver"],
+        ["I", "22-Jun-26", "Norway", "Senegal", "20:00", "MetLife Stadium, New York/New Jersey"],
+        ["I", "22-Jun-26", "France", "Iraq", "17:00", "Lincoln Financial Field, Philadelphia"],
+        ["J", "22-Jun-26", "Argentina", "Austria", "13:00", "AT&T Stadium, Dallas"],
+        ["J", "22-Jun-26", "Jordan", "Algeria", "23:00", "Levi's Stadium, San Francisco Bay Area"],
+        ["L", "23-Jun-26", "England", "Ghana", "16:00", "Gillette Stadium, Boston"],
+        ["L", "23-Jun-26", "Panama", "Croatia", "19:00", "BMO Field, Toronto"],
+        ["K", "23-Jun-26", "Portugal", "Uzbekistan", "13:00", "NRG Stadium, Houston"],
+        ["K", "23-Jun-26", "Colombia", "Congo DR", "22:00", "Estadio Akron, Guadalajara"],
+        ["C", "24-Jun-26", "Scotland", "Brazil", "18:00", "Hard Rock Stadium, Miami"],
+        ["C", "24-Jun-26", "Morocco", "Haiti", "18:00", "Mercedes-Benz Stadium, Atlanta"],
+        ["B", "24-Jun-26", "Switzerland", "Canada", "15:00", "BC Place, Vancouver"],
+        ["B", "24-Jun-26", "Bosnia and Herzegovina", "Qatar", "15:00", "Lumen Field, Seattle"],
+        ["A", "24-Jun-26", "Czechia", "Mexico", "21:00", "Estadio Azteca, Mexico City"],
+        ["A", "24-Jun-26", "South Africa", "South Korea", "21:00", "Estadio BBVA, Monterrey"],
+        ["E", "25-Jun-26", "Curaçao", "Ivory Coast", "16:00", "Lincoln Financial Field, Philadelphia"],
+        ["E", "25-Jun-26", "Ecuador", "Germany", "16:00", "MetLife Stadium, New York/New Jersey"],
+        ["F", "25-Jun-26", "Japan", "Sweden", "19:00", "AT&T Stadium, Dallas"],
+        ["F", "25-Jun-26", "Tunisia", "Netherlands", "19:00", "Arrowhead Stadium, Kansas City"],
+        ["D", "25-Jun-26", "Türkiye", "USA", "22:00", "SoFi Stadium, Los Angeles"],
+        ["D", "25-Jun-26", "Paraguay", "Australia", "22:00", "Levi's Stadium, San Francisco Bay Area"],
+        ["I", "26-Jun-26", "Norway", "France", "15:00", "Gillette Stadium, Boston"],
+        ["I", "26-Jun-26", "Senegal", "Iraq", "15:00", "BMO Field, Toronto"],
+        ["G", "26-Jun-26", "Egypt", "Iran", "23:00", "Lumen Field, Seattle"],
+        ["G", "26-Jun-26", "New Zealand", "Belgium", "23:00", "BC Place, Vancouver"],
+        ["H", "26-Jun-26", "Cape Verde", "Saudi Arabia", "20:00", "NRG Stadium, Houston"],
+        ["H", "26-Jun-26", "Uruguay", "Spain", "20:00", "Estadio Akron, Guadalajara"],
+        ["L", "27-Jun-26", "Panama", "England", "17:00", "MetLife Stadium, New York/New Jersey"],
+        ["L", "27-Jun-26", "Croatia", "Ghana", "17:00", "Lincoln Financial Field, Philadelphia"],
+        ["J", "27-Jun-26", "Algeria", "Austria", "22:00", "Arrowhead Stadium, Kansas City"],
+        ["J", "27-Jun-26", "Jordan", "Argentina", "22:00", "AT&T Stadium, Dallas"],
+        ["K", "27-Jun-26", "Colombia", "Portugal", "19:30", "Hard Rock Stadium, Miami"],
+        ["K", "27-Jun-26", "Congo DR", "Uzbekistan", "19:30", "Mercedes-Benz Stadium, Atlanta"]
+    ];
+
+    let matches = rawMatches.map((m, i) => ({ id: `M${i+1}`, group: m[0], date: m[1], t1: m[2], t2: m[3], time: m[4], venue: m[5], isKO: false }));
+    
+    const koMatches = [
+        { id: 'M73', date: '28-Jun-26', time: '15:00', venue: 'SoFi Stadium, Los Angeles', t1_ref: '2A', t2_ref: '2B', phase: 'Round of 32' },
+        { id: 'M74', date: '29-Jun-26', time: '16:30', venue: 'Gillette Stadium, Boston', t1_ref: '1E', t2_ref: '3_0', phase: 'Round of 32' },
+        { id: 'M75', date: '29-Jun-26', time: '21:00', venue: 'Estadio BBVA, Monterrey', t1_ref: '1F', t2_ref: '2C', phase: 'Round of 32' },
+        { id: 'M76', date: '29-Jun-26', time: '13:00', venue: 'NRG Stadium, Houston', t1_ref: '1C', t2_ref: '2F', phase: 'Round of 32' },
+        { id: 'M77', date: '30-Jun-26', time: '17:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: '1I', t2_ref: '3_1', phase: 'Round of 32' },
+        { id: 'M78', date: '30-Jun-26', time: '13:00', venue: 'AT&T Stadium, Dallas', t1_ref: '2E', t2_ref: '2I', phase: 'Round of 32' },
+        { id: 'M79', date: '30-Jun-26', time: '21:00', venue: 'Estadio Azteca, Mexico City', t1_ref: '1A', t2_ref: '3_2', phase: 'Round of 32' },
+        { id: 'M80', date: '1-Jul-26', time: '12:00', venue: 'Mercedes-Benz Stadium, Atlanta', t1_ref: '1L', t2_ref: '3_3', phase: 'Round of 32' },
+        { id: 'M81', date: '1-Jul-26', time: '20:00', venue: "Levi's Stadium, San Francisco Bay Area", t1_ref: '1D', t2_ref: '3_4', phase: 'Round of 32' },
+        { id: 'M82', date: '1-Jul-26', time: '16:00', venue: 'Lumen Field, Seattle', t1_ref: '1G', t2_ref: '3_5', phase: 'Round of 32' },
+        { id: 'M83', date: '2-Jul-26', time: '19:00', venue: 'BMO Field, Toronto', t1_ref: '2K', t2_ref: '2L', phase: 'Round of 32' },
+        { id: 'M84', date: '2-Jul-26', time: '15:00', venue: 'SoFi Stadium, Los Angeles', t1_ref: '1H', t2_ref: '2J', phase: 'Round of 32' },
+        { id: 'M85', date: '2-Jul-26', time: '23:00', venue: 'BC Place, Vancouver', t1_ref: '1B', t2_ref: '3_6', phase: 'Round of 32' },
+        { id: 'M86', date: '3-Jul-26', time: '18:00', venue: 'Hard Rock Stadium, Miami', t1_ref: '1J', t2_ref: '2H', phase: 'Round of 32' },
+        { id: 'M87', date: '3-Jul-26', time: '21:30', venue: 'Arrowhead Stadium, Kansas City', t1_ref: '1K', t2_ref: '3_7', phase: 'Round of 32' },
+        { id: 'M88', date: '3-Jul-26', time: '14:00', venue: 'AT&T Stadium, Dallas', t1_ref: '2D', t2_ref: '2G', phase: 'Round of 32' },
+        { id: 'M89', date: '4-Jul-26', time: '17:00', venue: 'Lincoln Financial Field, Philadelphia', t1_ref: 'W74', t2_ref: 'W77', phase: 'Round of 16' },
+        { id: 'M90', date: '4-Jul-26', time: '13:00', venue: 'NRG Stadium, Houston', t1_ref: 'W73', t2_ref: 'W75', phase: 'Round of 16' },
+        { id: 'M91', date: '5-Jul-26', time: '16:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: 'W76', t2_ref: 'W78', phase: 'Round of 16' },
+        { id: 'M92', date: '5-Jul-26', time: '20:00', venue: 'Estadio Azteca, Mexico City', t1_ref: 'W79', t2_ref: 'W80', phase: 'Round of 16' },
+        { id: 'M93', date: '6-Jul-26', time: '15:00', venue: 'AT&T Stadium, Dallas', t1_ref: 'W83', t2_ref: 'W84', phase: 'Round of 16' },
+        { id: 'M94', date: '6-Jul-26', time: '20:00', venue: 'Lumen Field, Seattle', t1_ref: 'W81', t2_ref: 'W82', phase: 'Round of 16' },
+        { id: 'M95', date: '7-Jul-26', time: '12:00', venue: 'Mercedes-Benz Stadium, Atlanta', t1_ref: 'W86', t2_ref: 'W88', phase: 'Round of 16' },
+        { id: 'M96', date: '7-Jul-26', time: '16:00', venue: 'BC Place, Vancouver', t1_ref: 'W85', t2_ref: 'W87', phase: 'Round of 16' },
+        { id: 'M97', date: '9-Jul-26', time: '16:00', venue: 'Gillette Stadium, Boston', t1_ref: 'W89', t2_ref: 'W90', phase: 'Quarter-finals' },
+        { id: 'M98', date: '10-Jul-26', time: '15:00', venue: 'SoFi Stadium, Los Angeles', t1_ref: 'W93', t2_ref: 'W94', phase: 'Quarter-finals' },
+        { id: 'M99', date: '11-Jul-26', time: '17:00', venue: 'Hard Rock Stadium, Miami', t1_ref: 'W91', t2_ref: 'W92', phase: 'Quarter-finals' },
+        { id: 'M100', date: '11-Jul-26', time: '21:00', venue: 'Arrowhead Stadium, Kansas City', t1_ref: 'W95', t2_ref: 'W96', phase: 'Quarter-finals' },
+        { id: 'M101', date: '14-Jul-26', time: '15:00', venue: 'AT&T Stadium, Dallas', t1_ref: 'W97', t2_ref: 'W98', phase: 'Semi-finals' },
+        { id: 'M102', date: '15-Jul-26', time: '15:00', venue: 'Mercedes-Benz Stadium, Atlanta', t1_ref: 'W99', t2_ref: 'W100', phase: 'Semi-finals' },
+        { id: 'M103', date: '18-Jul-26', time: '17:00', venue: 'Hard Rock Stadium, Miami', t1_ref: 'L101', t2_ref: 'L102', phase: 'Third Place' },
+        { id: 'M104', date: '19-Jul-26', time: '15:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: 'W101', t2_ref: 'W102', phase: 'Final' }
+    ].map(m => ({...m, isKO: true}));
+
+    let allMatches = [...matches, ...koMatches];
+    let actualStandings = {}; // Tabela Real global (usada para os cálculos)
+
+    let state = JSON.parse(localStorage.getItem('wc2026_data')) || { actual: {}, preds: { p1: {}, p2: {}, p3: {}, p4: {} }, names: [] };
+
+    function toggleSection(id) {
+        const el = document.getElementById(id);
+        if(el.classList.contains('hidden')) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+    }
+
+    function updateDropdownNames() {
+        let select = document.getElementById('standings-view-select');
+        if(!select) return;
+        ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => {
+            let name = document.getElementById(`${p}-name`).value;
+            select.options[i+1].text = `👁️ Previsão: ${name}`;
+        });
+    }
+
+    // Motor de Simulação de Tabelas (Aceita 'actual' ou palpites de um jogador)
+    function getStandings(dataSource) {
+        let st = {};
+        for (let g in groups) { st[g] = groups[g].map(team => ({ name: team, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0 })); }
+        
+        matches.forEach(m => {
+            let data = dataSource[m.id];
+            if (data && data.g1 !== "" && data.g2 !== "") {
+                let g1 = parseInt(data.g1), g2 = parseInt(data.g2);
+                let t1 = st[m.group].find(t => t.name === m.t1);
+                let t2 = st[m.group].find(t => t.name === m.t2);
+                t1.p++; t2.p++;
+                t1.gf += g1; t1.ga += g2; t1.gd = t1.gf - t1.ga;
+                t2.gf += g2; t2.ga += g1; t2.gd = t2.gf - t2.ga;
+                if (g1 > g2) { t1.w++; t1.pts += 3; t2.l++; }
+                else if (g1 < g2) { t2.w++; t2.pts += 3; t1.l++; }
+                else { t1.d++; t2.d++; t1.pts += 1; t2.pts += 1; }
+            }
+        });
+        
+        for (let g in st) st[g].sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+        return st;
+    }
+
+    function getQualifiedStats(st) {
+        let thirds = [];
+        for(let g in st) { if(st[g][2].p > 0) thirds.push(st[g][2]); }
+        thirds.sort((a,b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+        let top8 = thirds.slice(0,8).filter(t=>t.p>0).map(t=>t.name);
+        
+        return {
+            winners: Object.keys(st).map(g => st[g][0].p>0 ? st[g][0].name : null).filter(x=>x),
+            runners: Object.keys(st).map(g => st[g][1].p>0 ? st[g][1].name : null).filter(x=>x),
+            bestThirds: top8,
+            allQual: [...Object.keys(st).map(g => st[g][0].p>0 ? st[g][0].name : null).filter(x=>x),
+                      ...Object.keys(st).map(g => st[g][1].p>0 ? st[g][1].name : null).filter(x=>x),
+                      ...top8]
+        };
+    }
+
+    function resolveTeam(ref) {
+        // Usa sempre a tabela REAL (actualStandings) para a árvore do torneio visível
+        if (!ref) return "A Definir";
+        if (ref.match(/^[12][A-L]$/)) {
+            let pos = parseInt(ref[0]) - 1, grp = ref[1];
+            return actualStandings[grp] && actualStandings[grp][pos].p > 0 ? actualStandings[grp][pos].name : `(${ref})`;
+        }
+        if (ref.startsWith('3_')) {
+            let thirds = [];
+            for(let g in actualStandings) thirds.push(actualStandings[g][2]);
+            thirds.sort((a,b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+            let top8 = thirds.slice(0,8);
+            let idx = parseInt(ref.split('_')[1]);
+            return top8[idx] && top8[idx].p > 0 ? top8[idx].name : "(Melhor 3º)";
+        }
+        if (ref.startsWith('W') || ref.startsWith('L')) {
+            let prevId = 'M' + ref.substring(1);
+            let act = state.actual[prevId];
+            let mInfo = koMatches.find(m => m.id === prevId);
+            if (!act || act.g1 === "" || act.g2 === "") return `(${ref})`; 
+            let g1 = parseInt(act.g1), g2 = parseInt(act.g2);
+            let t1 = resolveTeam(mInfo.t1_ref), t2 = resolveTeam(mInfo.t2_ref);
+            let aAdv = g1 > g2 ? 't1' : (g2 > g1 ? 't2' : act.adv);
+            let winner = aAdv === 't1' ? t1 : (aAdv === 't2' ? t2 : `(${ref})`);
+            let loser = aAdv === 't1' ? t2 : (aAdv === 't2' ? t1 : `(${ref})`);
+            return ref.startsWith('W') ? winner : loser;
+        }
+        return ref;
+    }
+
+    function renderGroups() {
+        // Atualiza a global 'actualStandings' para os cálculos base do sistema
+        actualStandings = getStandings(state.actual);
+        
+        let viewSource = document.getElementById('standings-view-select').value;
+        let displayStandings = actualStandings;
+        let isSimulation = false;
+        
+        // Se escolheu ver a simulação de um jogador
+        if (viewSource !== 'actual') {
+            displayStandings = getStandings(state.preds[viewSource]);
+            isSimulation = true;
+        }
+
+        const container = document.getElementById('groups-container');
+        container.innerHTML = '';
+
+        for (let g in groups) {
+            let tableRows = displayStandings[g].map((t, i) => `
+                <tr class="${i === 0 ? 'rank-1' : (i === 1 ? 'rank-2' : (i === 2 ? 'rank-3' : ''))}">
+                    <td style="text-align:left;">${i+1}. ${t.name}</td>
+                    <td>${t.p}</td><td>${t.gd}</td><td>${t.pts}</td>
+                </tr>
+            `).join('');
+
+            let badge = isSimulation ? `<span style="background:#ffc107; color:#333; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">SIMULAÇÃO</span>` : ``;
+
+            container.innerHTML += `
+                <div class="group-card">
+                    <h3>Grupo ${g} ${badge}</h3>
+                    <table class="standings-table">
+                        <tr><th style="text-align:left;">Equipa</th><th>J</th><th>DG</th><th>Pts</th></tr>
+                        ${tableRows}
+                    </table>
+                </div>
+            `;
+        }
+    }
+
+    function calculateMatchPoints(m, p) {
+        let act = state.actual[m.id], pred = state.preds[p][m.id];
+        if (!act || act.g1 === "" || act.g2 === "" || !pred || pred.g1 === "" || pred.g2 === "") return 0;
+
+        let a1 = parseInt(act.g1), a2 = parseInt(act.g2);
+        let p1 = parseInt(pred.g1), p2 = parseInt(pred.g2);
+
+        let exact = (a1 === p1 && a2 === p2);
+        let gd = ((p1 - p2) === (a1 - a2));
+        let result = (Math.sign(p1 - p2) === Math.sign(a1 - a2));
+
+        if(!m.isKO) {
+            if(exact) return CONFIG.GS_EXACT;
+            if(gd) return CONFIG.GS_GD;
+            if(result) return CONFIG.GS_RESULT;
+            return 0;
+        } else {
+            if(exact) return CONFIG.KO_EXACT[m.phase];
+            if(gd) return CONFIG.KO_GD[m.phase];
+            if(result) return CONFIG.KO_RESULT[m.phase];
+            return 0;
+        }
+    }
+
+    function generateMatchHTML(m) {
+        let t1 = m.isKO ? resolveTeam(m.t1_ref) : m.t1;
+        let t2 = m.isKO ? resolveTeam(m.t2_ref) : m.t2;
+        let t1Class = t1.includes("(") ? "team-name tbd" : "team-name";
+        let t2Class = t2.includes("(") ? "team-name away tbd" : "team-name away";
+        let matchHeader = m.isKO ? `${m.date} | ${m.time} EST | ${m.venue} | ID: ${m.id}` : `Grupo ${m.group} | ${m.time} EST | ${m.venue} | ID: ${m.id}`;
+        
+        let actG1 = state.actual[m.id]?.g1 ?? "", actG2 = state.actual[m.id]?.g2 ?? "";
+        let isTie = m.isKO && actG1 !== "" && actG2 !== "" && actG1 === actG2;
+
+        return `
+        <div class="match-row">
+            <div class="match-info">${matchHeader}</div>
+            <div class="${t1Class}">${t1}</div>
+            
+            <div class="score-box actual">
+                <div class="score-inputs">
+                    <input type="number" min="0" onchange="updateActual('${m.id}', 'g1', this.value)" value="${actG1}">
+                    -
+                    <input type="number" min="0" onchange="updateActual('${m.id}', 'g2', this.value)" value="${actG2}">
+                </div>
+                ${isTie ? `
+                <select class="adv-select" onchange="updateActual('${m.id}', 'adv', this.value)">
+                    <option value="">(Penáltis)</option>
+                    <option value="t1" ${state.actual[m.id]?.adv==='t1'?'selected':''}>Passa ${t1.substring(0,4)}</option>
+                    <option value="t2" ${state.actual[m.id]?.adv==='t2'?'selected':''}>Passa ${t2.substring(0,4)}</option>
+                </select>` : ''}
+            </div>
+            
+            <div class="${t2Class}">${t2}</div>
+            
+            <div style="display:flex; gap: 10px; margin-left: auto;">
+                ${['p1', 'p2', 'p3', 'p4'].map((p, i) => {
+                    let pg1 = state.preds[p][m.id]?.g1 ?? "";
+                    let pg2 = state.preds[p][m.id]?.g2 ?? "";
+                    let pTie = m.isKO && pg1 !== "" && pg2 !== "" && pg1 === pg2;
+                    return `
+                    <div class="player-pred">
+                        <span>J${i+1}</span>
+                        <div class="score-inputs">
+                            <input type="number" min="0" onchange="updatePred('${p}', '${m.id}', 'g1', this.value)" value="${pg1}">
+                            -
+                            <input type="number" min="0" onchange="updatePred('${p}', '${m.id}', 'g2', this.value)" value="${pg2}">
+                        </div>
+                        ${pTie ? `
+                        <select class="adv-select" onchange="updatePred('${p}', '${m.id}', 'adv', this.value)">
+                            <option value="">Quem Passa?</option>
+                            <option value="t1" ${state.preds[p][m.id]?.adv==='t1'?'selected':''}>Equipa 1</option>
+                            <option value="t2" ${state.preds[p][m.id]?.adv==='t2'?'selected':''}>Equipa 2</option>
+                        </select>` : ''}
+                        <div class="points-awarded">${calculateMatchPoints(m, p)} pts</div>
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>`;
+    }
+
+    function renderMatches() {
+        const container = document.getElementById('matches-container');
+        container.innerHTML = '';
+        let groupedByDate = {};
+        matches.forEach(m => { if(!groupedByDate[m.date]) groupedByDate[m.date] = []; groupedByDate[m.date].push(m); });
+
+        for(let date in groupedByDate) {
+            let idSafeDate = date.replace(/\//g, '-');
+            let html = `<div class="collapsible-header" onclick="toggleSection('date-${idSafeDate}')">📅 Dia ${date} ▼</div>`;
+            html += `<div id="date-${idSafeDate}" class="collapsible-content">`;
+            groupedByDate[date].forEach(m => html += generateMatchHTML(m));
+            html += `</div>`;
+            container.innerHTML += html;
+        }
+    }
+
+    function renderKnockouts() {
+        const container = document.getElementById('knockouts-container');
+        container.innerHTML = '';
+        let groupedByPhase = {};
+        koMatches.forEach(m => { if(!groupedByPhase[m.phase]) groupedByPhase[m.phase] = []; groupedByPhase[m.phase].push(m); });
+
+        for(let phase in groupedByPhase) {
+            let idSafePhase = phase.replace(/\s/g, '-');
+            let finalClass = phase.includes('Final') ? 'final-header' : '';
+            let html = `<div class="collapsible-header ${finalClass}" onclick="toggleSection('phase-${idSafePhase}')">🏆 ${phase} ▼</div>`;
+            html += `<div id="phase-${idSafePhase}" class="collapsible-content">`;
+            groupedByPhase[phase].forEach(m => html += generateMatchHTML(m));
+            html += `</div>`;
+            container.innerHTML += html;
+        }
+    }
+
+    function updateActual(matchId, prop, value) {
+        if(!state.actual[matchId]) state.actual[matchId] = {g1: "", g2: "", adv: ""};
+        state.actual[matchId][prop] = value;
+        if (state.actual[matchId].g1 !== state.actual[matchId].g2) state.actual[matchId].adv = ""; 
+        renderGroups(); renderMatches(); renderKnockouts(); updateLeaderboard();
+    }
+
+    function updatePred(player, matchId, prop, value) {
+        if(!state.preds[player][matchId]) state.preds[player][matchId] = {g1: "", g2: "", adv: ""};
+        state.preds[player][matchId][prop] = value;
+        
+        // Renderizar a secção correta
+        if(parseInt(matchId.replace('M','')) <= 72) {
+            renderMatches();
+            // Se o utilizador estiver a ver a tabela deste jogador exato, atualiza a grelha de grupos ao vivo
+            let viewSource = document.getElementById('standings-view-select').value;
+            if(viewSource === player) renderGroups();
+        } else {
+            renderKnockouts();
+        }
+        
+        updateLeaderboard();
+    }
+
+    function updateLeaderboard() {
+        actualStandings = getStandings(state.actual);
+        let actualQ = getQualifiedStats(actualStandings);
+        
+        // Fase Bonus por Acertos nas Rondas
+        let koPhaseBonus = { p1: 0, p2: 0, p3: 0, p4: 0 };
+        let phases = [...new Set(koMatches.map(m=>m.phase))];
+        phases.forEach(phase => {
+            let scores = { p1:0, p2:0, p3:0, p4:0 };
+            let inPhase = koMatches.filter(m=>m.phase===phase);
+            let resolvedCount = 0;
+            
+            inPhase.forEach(m => {
+                 let act = state.actual[m.id];
+                 if(!act || act.g1==="" || act.g2==="") return;
+                 let a1 = parseInt(act.g1), a2 = parseInt(act.g2);
+                 let aAdv = a1>a2 ? 't1' : (a1<a2 ? 't2' : act.adv);
+                 if(!aAdv) return;
+                 resolvedCount++;
+
+                 ['p1','p2','p3','p4'].forEach(p => {
+                     let pred = state.preds[p][m.id];
+                     if(!pred || pred.g1==="" || pred.g2==="") return;
+                     let p1 = parseInt(pred.g1), p2 = parseInt(pred.g2);
+                     let pAdv = p1>p2 ? 't1' : (p1<p2 ? 't2' : pred.adv);
+                     if(pAdv === aAdv) scores[p]++;
+                 });
+            });
+            
+            if (resolvedCount > 0) {
+                let uniqueScores = [...new Set(Object.values(scores))].sort((a,b)=>b-a);
+                let max = uniqueScores[0], second = uniqueScores[1];
+                ['p1','p2','p3','p4'].forEach(p => {
+                    if(scores[p] === max && max > 0) koPhaseBonus[p] += CONFIG.KO_EXTRA_1ST;
+                    else if(scores[p] === second && second > 0) koPhaseBonus[p] += CONFIG.KO_EXTRA_2ND;
+                });
+            }
+        });
+
+        let stats = ['p1', 'p2', 'p3', 'p4'].map((p) => {
+            let name = document.getElementById(`${p}-name`).value;
+            let gsPts = 0, koPts = 0;
+            
+            matches.forEach(m => gsPts += calculateMatchPoints(m, p));
+            koMatches.forEach(m => koPts += calculateMatchPoints(m, p));
+
+            // Bonus de Simulação de Grupos
+            let pSt = getStandings(state.preds[p]);
+            let pQ = getQualifiedStats(pSt);
+            let gsBonus = 0;
+            
+            for(let g in groups) {
+                if(actualStandings[g][0].p > 0 && pSt[g][0].name === actualStandings[g][0].name) gsBonus += CONFIG.BONUS_WINNER;
+                if(actualStandings[g][1].p > 0 && pSt[g][1].name === actualStandings[g][1].name) gsBonus += CONFIG.BONUS_RUNNERUP;
+            }
+            pQ.bestThirds.forEach(t => { if(actualQ.bestThirds.includes(t)) gsBonus += CONFIG.BONUS_BEST3RD; });
+            pQ.allQual.forEach(t => { if(actualQ.allQual.includes(t)) gsBonus += CONFIG.BONUS_QUALIFIED; });
+
+            let totalPtsGeral = gsPts + gsBonus + koPts + koPhaseBonus[p];
+            return { name, gsPts, gsBonus, koPts, koExtra: koPhaseBonus[p], totalPtsGeral };
+        });
+
+        stats.sort((a, b) => b.totalPtsGeral - a.totalPtsGeral);
+
+        document.getElementById('leaderboard-body').innerHTML = stats.map((s, i) => `
+            <tr>
+                <td><b>${i+1}º</b></td>
+                <td><b>${s.name}</b></td>
+                <td style="font-size:18px; color:#d9534f;"><b>${s.totalPtsGeral}</b></td>
+                <td>${s.gsPts}</td>
+                <td><b style="color:green;">+${s.gsBonus}</b></td>
+                <td>${s.koPts}</td>
+                <td><b style="color:green;">+${s.koExtra}</b></td>
+            </tr>
+        `).join('');
+    }
+
+    function saveData() {
+        state.names = ['p1', 'p2', 'p3', 'p4'].map(p => document.getElementById(`${p}-name`).value);
+        localStorage.setItem('wc2026_data', JSON.stringify(state));
+        alert("Progresso guardado com sucesso!");
+    }
+
+    function resetData() {
+        if(confirm("Apagar todos os palpites e resultados reais?")) {
+            localStorage.removeItem('wc2026_data');
+            location.reload();
+        }
+    }
+
+    // Eventos de mudança de nome para atualizar Leaderboard e Dropdown
+    if(state.names && state.names.length === 4) {
+        ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => document.getElementById(`${p}-name`).value = state.names[i]);
+    }
+    
+    ['p1', 'p2', 'p3', 'p4'].forEach(p => {
+        let input = document.getElementById(`${p}-name`);
+        input.addEventListener('input', () => {
+            updateLeaderboard();
+            updateDropdownNames();
+        });
+    });
+
+    // Inicialização
+    updateDropdownNames();
+    renderGroups();
+    renderMatches();
+    renderKnockouts();
+    updateLeaderboard();
+</script>
+
+</body>
+</html>
