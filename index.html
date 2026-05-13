@@ -6,13 +6,17 @@
     <title>Predictor Mundial 2026 - Online Master</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
-        h1, h2, h3 { color: #0056b3; text-align: center; }
+        h1, h2, h3 { color: #0056b3; text-align: center; margin-top: 10px; }
         h2 { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 40px; flex-wrap: wrap; }
         .container { max-width: 1350px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         
+        .top-bar { background: #343a40; color: white; padding: 15px; text-align: center; border-radius: 8px; margin-bottom: 20px; font-size: 16px; font-weight: bold; }
+        .top-bar select { font-size: 16px; padding: 5px; border-radius: 5px; border: 2px solid #ffc107; font-weight: bold; cursor: pointer; }
+
         .players-section { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;}
         input[type="text"], input[type="number"], select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
-        input[type="number"] { width: 40px; font-weight: bold; }
+        input[type="number"] { width: 45px; font-weight: bold; }
+        input[type="number"]:disabled { background: #eee; color: #555; border: none;}
         select.adv-select { font-size: 10px; padding: 2px; margin-top: 5px; width: 100%; background: #d4edda; border-color: #28a745;}
         .player-input { font-weight: bold; color: #d9534f; }
 
@@ -38,17 +42,17 @@
         .team-name.away { text-align: left; }
         .team-name.tbd { color: #aaa; font-style: italic; }
         
-        .score-box { display: flex; flex-direction: column; align-items: center; gap: 2px; background: #e9ecef; padding: 5px 10px; border-radius: 5px; }
+        .score-box { display: flex; flex-direction: column; align-items: center; gap: 2px; background: #e9ecef; padding: 5px 10px; border-radius: 5px; min-width: 80px;}
         .score-box.actual { background: #ffeeba; border: 1px solid #ffc107; }
         .score-inputs { display: flex; align-items: center; gap: 5px; }
         
-        .player-pred { display: flex; flex-direction: column; align-items: center; font-size: 12px; min-width: 75px; }
+        .player-pred { display: flex; flex-direction: column; align-items: center; font-size: 12px; min-width: 85px; }
         .points-awarded { font-weight: bold; color: green; margin-top: 3px; font-size: 11px;}
+        .hidden-pred { color: #888; font-style: italic; background: #f0f0f0; padding: 5px 10px; border-radius: 5px; border: 1px dashed #ccc; }
         
         .actions { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
-        button.btn-main { background-color: #28a745; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; }
+        button.btn-main { background-color: #28a745; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; font-weight: bold;}
         button.btn-main:hover { background-color: #218838; }
-        button.reset { background-color: #dc3545; }
         
         .toggle-btn { font-size: 14px; cursor: pointer; padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; background: #eee; }
         .collapsible-header { background: #343a40; color: white; padding: 10px; border-radius: 5px; margin-top: 15px; text-align: center; font-weight: bold; cursor: pointer; }
@@ -66,6 +70,18 @@
     <div id="loading-screen">A carregar dados do estádio... 🏟️⚽</div>
     
     <div id="app-content">
+        <div class="top-bar">
+            👤 Entrar como: 
+            <select id="current-user" onchange="window.renderApp()">
+                <option value="spectator" selected>Espectador (Ver Apenas)</option>
+                <option value="admin">⭐ Administrador (Resultados Reais)</option>
+                <option value="p1">Jogador 1</option>
+                <option value="p2">Jogador 2</option>
+                <option value="p3">Jogador 3</option>
+                <option value="p4">Jogador 4</option>
+            </select>
+        </div>
+
         <h1>🏆 Predictor Mundial 2026</h1>
         
         <div class="players-section">
@@ -92,12 +108,11 @@
         </table>
 
         <div class="actions">
-            <button class="btn-main" onclick="window.saveData()">💾 Guardar na Nuvem</button>
-            <button class="btn-main reset" onclick="window.resetData()">⚠️ Apagar Cloud</button>
+            <button class="btn-main" onclick="window.saveData()">💾 Submeter Palpites na Nuvem</button>
         </div>
 
         <h2>Classificações 
-            <select id="standings-view-select" onchange="window.renderGroups()" style="font-size:16px; font-weight:bold; border:2px solid #0056b3;">
+            <select id="standings-view-select" onchange="window.renderGroups()" style="font-size:16px; font-weight:bold; border:2px solid #0056b3; border-radius:5px; padding:3px;">
                 <option value="actual">📊 Realidade</option>
                 <option value="p1">👁️ Previsão: J1</option>
                 <option value="p2">👁️ Previsão: J2</option>
@@ -215,12 +230,25 @@
     ].map(m => ({...m, isKO: true}));
 
     let actualStandings = {};
-    let state = { actual: {}, preds: { p1: {}, p2: {}, p3: {}, p4: {} }, names: ["J1", "J2", "J3", "J4"] };
+    let state = { actual: {}, preds: {}, names: ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"] };
 
     get(dbRef).then((snap) => {
         if(snap.exists()) state = snap.val();
+        
+        // CORREÇÃO CRÍTICA: Impedir que o Firebase apague as estruturas se estiverem vazias
+        if(!state.actual) state.actual = {};
+        if(!state.preds) state.preds = {};
+        ['p1', 'p2', 'p3', 'p4'].forEach(p => { if(!state.preds[p]) state.preds[p] = {}; });
+        if(!state.names) state.names = ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"];
+        
         init();
-    }).catch(() => init());
+    }).catch((e) => {
+        console.error(e);
+        // Prevenir erro se a net for abaixo
+        if(!state.actual) state.actual = {};
+        if(!state.preds) state.preds = { p1:{}, p2:{}, p3:{}, p4:{} };
+        init();
+    });
 
     function init() {
         document.getElementById('loading-screen').style.display = 'none';
@@ -228,16 +256,37 @@
         ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => {
             let input = document.getElementById(`${p}-name`);
             input.value = state.names[i];
-            input.oninput = () => { updateLeaderboard(); updateDropdownNames(); };
+            input.oninput = () => { window.updateLeaderboard(); window.updateDropdownNames(); };
         });
-        updateDropdownNames(); renderGroups(); renderMatches(); renderKnockouts(); updateLeaderboard();
+        window.renderApp();
     }
+
+    // --- FUNÇÃO PARA VERIFICAR A HORA DO JOGO ---
+    window.isMatchStarted = function(dateStr, timeStr) {
+        let months = { "Jan":"01", "Feb":"02", "Mar":"03", "Apr":"04", "May":"05", "Jun":"06", "Jul":"07", "Aug":"08", "Sep":"09", "Oct":"10", "Nov":"11", "Dec":"12" };
+        let parts = dateStr.split('-');
+        let isoStr = `20${parts[2]}-${months[parts[1]]}-${parts[0].padStart(2,'0')}T${timeStr}:00-04:00`; // EST time
+        return new Date() >= new Date(isoStr);
+    };
 
     window.toggleSection = id => document.getElementById(id).classList.toggle('hidden');
 
-    function updateDropdownNames() {
-        const sel = document.getElementById('standings-view-select');
-        ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => sel.options[i+1].text = "👁️ Previsão: " + document.getElementById(`${p}-name`).value);
+    window.updateDropdownNames = function() {
+        const selStandings = document.getElementById('standings-view-select');
+        const selUser = document.getElementById('current-user');
+        ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => {
+            let n = document.getElementById(`${p}-name`).value;
+            if(selStandings) selStandings.options[i+1].text = "👁️ Previsão: " + n;
+            if(selUser) selUser.options[i+2].text = n;
+        });
+    }
+
+    window.renderApp = function() {
+        window.updateDropdownNames();
+        window.renderGroups();
+        window.renderMatches();
+        window.renderKnockouts();
+        window.updateLeaderboard();
     }
 
     function getStandings(src) {
@@ -300,7 +349,7 @@
         container.innerHTML = '';
         for (let g in groups) {
             let rows = st[g].map((t, i) => `<tr class="${i<2?'rank-'+(i+1):i==2?'rank-3':''}"><td>${i+1}. ${t.name}</td><td>${t.p}</td><td>${t.gd}</td><td>${t.pts}</td></tr>`).join('');
-            container.innerHTML += `<div class="group-card"><h3>Grupo ${g} ${src!=='actual'?'<small>(Sim)</small>':''}</h3><table class="standings-table"><tr><th>Equipa</th><th>J</th><th>DG</th><th>Pts</th></tr>${rows}</table></div>`;
+            container.innerHTML += `<div class="group-card"><h3>Grupo ${g} ${src!=='actual'?'<small style="background:#ffc107;color:#333;font-size:10px;padding:2px;border-radius:4px;">SIMULAÇÃO</small>':''}</h3><table class="standings-table"><tr><th>Equipa</th><th>J</th><th>DG</th><th>Pts</th></tr>${rows}</table></div>`;
         }
     }
 
@@ -317,10 +366,77 @@
     function matchHTML(m) {
         let t1 = m.isKO ? resolve(m.t1_ref) : m.t1, t2 = m.isKO ? resolve(m.t2_ref) : m.t2;
         let act = state.actual[m.id] || {g1:"", g2:"", adv:""}, isTie = m.isKO && act.g1 !== "" && act.g1 === act.g2;
-        return `<div class="match-row"><div class="match-info">${m.date} | ${m.time} | ${m.venue} | ID: ${m.id}</div><div class="team-name ${t1.includes('(')?'tbd':''}">${t1}</div><div class="score-box actual"><div class="score-inputs"><input type="number" onchange="window.upA('${m.id}','g1',this.value)" value="${act.g1}">-<input type="number" onchange="window.upA('${m.id}','g2',this.value)" value="${act.g2}"></div>${isTie?`<select class="adv-select" onchange="window.upA('${m.id}','adv',this.value)"><option value="">Passa...</option><option value="t1" ${act.adv=='t1'?'selected':''}>${t1.substring(0,4)}</option><option value="t2" ${act.adv=='t2'?'selected':''}>${t2.substring(0,4)}</option></select>`:''}</div><div class="team-name away ${t2.includes('(')?'tbd':''}">${t2}</div><div style="display:flex;gap:5px;">${['p1','p2','p3','p4'].map(p=>{let pr=state.preds[p][m.id]||{g1:"",g2:"",adv:""};return `<div class="player-pred"><span>${p.toUpperCase()}</span><div class="score-inputs"><input type="number" onchange="window.upP('${p}','${m.id}','g1',this.value)" value="${pr.g1}">-<input type="number" onchange="window.upP('${p}','${m.id}','g2',this.value)" value="${pr.g2}"></div>${m.isKO&&pr.g1!=""&&pr.g1==pr.g2?`<select class="adv-select" onchange="window.upP('${p}','${m.id}','adv',this.value)"><option value="">P...</option><option value="t1" ${pr.adv=='t1'?'selected':''}>T1</option><option value="t2" ${pr.adv=='t2'?'selected':''}>T2</option></select>`:''}<div class="points-awarded">${calcPts(m,p)} pts</div></div>`}).join('')}</div></div>`;
+        
+        let started = window.isMatchStarted(m.date, m.time);
+        let currentUser = document.getElementById('current-user').value;
+        
+        // Resultados Reais (Só Admin pode editar)
+        let actualHtml = '';
+        if (currentUser === 'admin') {
+            actualHtml = `
+            <div class="score-inputs">
+                <input type="number" onchange="window.upA('${m.id}','g1',this.value)" value="${act.g1}">-
+                <input type="number" onchange="window.upA('${m.id}','g2',this.value)" value="${act.g2}">
+            </div>
+            ${isTie?`<select class="adv-select" onchange="window.upA('${m.id}','adv',this.value)">
+                <option value="">(Penáltis)</option>
+                <option value="t1" ${act.adv=='t1'?'selected':''}>Passa ${t1.substring(0,4)}</option>
+                <option value="t2" ${act.adv=='t2'?'selected':''}>Passa ${t2.substring(0,4)}</option>
+            </select>`:''}`;
+        } else {
+            actualHtml = `<div style="font-size:16px; font-weight:bold; padding: 5px;">${act.g1!==""?act.g1:'-'} : ${act.g2!==""?act.g2:'-'}</div>
+            ${isTie && act.adv ? `<div style="font-size:10px; background:#d4edda; padding:2px; border-radius:3px;">P: ${act.adv=='t1'?t1.substring(0,4):t2.substring(0,4)}</div>` : ''}`;
+        }
+
+        // Palpites dos Jogadores
+        let playersHtml = ['p1','p2','p3','p4'].map(p => {
+            let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
+            let pTie = m.isKO && pr.g1 !== "" && pr.g1 == pr.g2;
+            let canEdit = (!started && currentUser === p);
+            let canView = (started || currentUser === p || currentUser === 'admin'); // Admin só vê se já tiver começado ou se quiseres deixar o admin ver tudo, mudei para ver só o dele. Para ser justo, o Admin também só vê depois do jogo começar!
+            
+            if(currentUser === 'admin') canView = started; // Admin só vê palpites dos outros após o jogo começar!
+            if(currentUser === p) canView = true;
+
+            let predContent = '';
+            if (canEdit) {
+                predContent = `
+                <div class="score-inputs">
+                    <input type="number" onchange="window.upP('${p}','${m.id}','g1',this.value)" value="${pr.g1}">-
+                    <input type="number" onchange="window.upP('${p}','${m.id}','g2',this.value)" value="${pr.g2}">
+                </div>
+                ${pTie?`<select class="adv-select" onchange="window.upP('${p}','${m.id}','adv',this.value)">
+                    <option value="">Quem Passa?</option>
+                    <option value="t1" ${pr.adv=='t1'?'selected':''}>Equipa 1</option>
+                    <option value="t2" ${pr.adv=='t2'?'selected':''}>Equipa 2</option>
+                </select>`:''}`;
+            } else if (canView) {
+                predContent = `<div style="font-size:14px; padding: 5px;"><b>${pr.g1!==""?pr.g1:'-'}</b> - <b>${pr.g2!==""?pr.g2:'-'}</b></div>
+                ${pTie && pr.adv ? `<div style="font-size:10px; color:#555;">P: ${pr.adv=='t1'?'Eq.1':'Eq.2'}</div>` : ''}`;
+            } else {
+                predContent = `<div class="hidden-pred">🔒 Oculto</div>`;
+            }
+
+            return `<div class="player-pred">
+                <span>${document.getElementById(p+'-name').value.substring(0,6)}</span>
+                ${predContent}
+                <div class="points-awarded">${calcPts(m,p)} pts</div>
+            </div>`;
+        }).join('');
+
+        return `<div class="match-row">
+            <div class="match-info">${m.date} | ${m.time} EST | ${m.venue} | ID: ${m.id}</div>
+            <div class="team-name ${t1.includes('(')?'tbd':''}">${t1}</div>
+            <div class="score-box actual">
+                <small style="font-size:9px;">REAL</small>
+                ${actualHtml}
+            </div>
+            <div class="team-name away ${t2.includes('(')?'tbd':''}">${t2}</div>
+            <div style="display:flex;gap:10px;">${playersHtml}</div>
+        </div>`;
     }
 
-    function renderMatches() {
+    window.renderMatches = function() {
         const c = document.getElementById('matches-container'); c.innerHTML = '';
         let groupsD = {}; matches.forEach(m => { if(!groupsD[m.date]) groupsD[m.date] = []; groupsD[m.date].push(m); });
         for(let d in groupsD) {
@@ -329,7 +445,7 @@
         }
     }
 
-    function renderKnockouts() {
+    window.renderKnockouts = function() {
         const c = document.getElementById('knockouts-container'); c.innerHTML = '';
         let groupsP = {}; koMatches.forEach(m => { if(!groupsP[m.phase]) groupsP[m.phase] = []; groupsP[m.phase].push(m); });
         for(let p in groupsP) {
@@ -338,10 +454,10 @@
         }
     }
 
-    window.upA = (id, k, v) => { if(!state.actual[id]) state.actual[id]={g1:"",g2:"",adv:""}; state.actual[id][k]=v; window.renderGroups(); renderMatches(); renderKnockouts(); updateLeaderboard(); }
-    window.upP = (p, id, k, v) => { if(!state.preds[p][id]) state.preds[p][id]={g1:"",g2:"",adv:""}; state.preds[p][id][k]=v; if(parseInt(id.replace('M',''))<=72){ renderMatches(); if(document.getElementById('standings-view-select').value==p) window.renderGroups(); } else renderKnockouts(); updateLeaderboard(); }
+    window.upA = (id, k, v) => { if(!state.actual[id]) state.actual[id]={g1:"",g2:"",adv:""}; state.actual[id][k]=v; window.renderGroups(); window.renderMatches(); window.renderKnockouts(); window.updateLeaderboard(); }
+    window.upP = (p, id, k, v) => { if(!state.preds[p][id]) state.preds[p][id]={g1:"",g2:"",adv:""}; state.preds[p][id][k]=v; if(parseInt(id.replace('M',''))<=72){ window.renderMatches(); if(document.getElementById('standings-view-select').value==p) window.renderGroups(); } else window.renderKnockouts(); window.updateLeaderboard(); }
 
-    function updateLeaderboard() {
+    window.updateLeaderboard = function() {
         actualStandings = getStandings(state.actual); let aQ = getQ(actualStandings);
         let koB = {p1:0, p2:0, p3:0, p4:0};
         [...new Set(koMatches.map(m=>m.phase))].forEach(ph => {
@@ -366,14 +482,13 @@
             return { n: document.getElementById(p+'-name').value, gs, b, ko, extra: koB[p], tot: gs+b+ko+koB[p] };
         }).sort((a,b) => b.tot - a.tot);
 
-        document.getElementById('leaderboard-body').innerHTML = stats.map((s,i) => `<tr><td>${i+1}º</td><td>${s.n}</td><td><b>${s.tot}</b></td><td>${s.gs}</td><td>+${s.b}</td><td>${s.ko}</td><td>+${s.extra}</td></tr>`).join('');
+        document.getElementById('leaderboard-body').innerHTML = stats.map((s,i) => `<tr><td>${i+1}º</td><td>${s.n}</td><td style="font-size:18px; color:#d9534f;"><b>${s.tot}</b></td><td>${s.gs}</td><td><b style="color:green;">+${s.b}</b></td><td>${s.ko}</td><td><b style="color:green;">+${s.extra}</b></td></tr>`).join('');
     }
 
     window.saveData = () => {
         state.names = ['p1','p2','p3','p4'].map(p => document.getElementById(p+'-name').value);
-        set(dbRef, state).then(() => alert("Dados na Nuvem! ☁️")).catch(e => alert("Erro: " + e));
+        set(dbRef, state).then(() => alert("Palpites submetidos e gravados com sucesso! ☁️")).catch(e => alert("Erro: " + e));
     }
-    window.resetData = () => confirm("Apagar TUDO?") && set(dbRef, null).then(() => location.reload());
 </script>
 
 </body>
