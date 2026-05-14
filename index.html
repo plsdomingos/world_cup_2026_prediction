@@ -61,7 +61,7 @@
         
         .player-pred { display: flex; flex-direction: column; align-items: center; font-size: 12px; background: #fdfdfd; padding: 8px; border-radius: 6px; border: 1px solid #f0f0f0;}
         .player-pred > span { font-weight: bold; margin-bottom: 4px; color: #333; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        .points-awarded { font-weight: bold; color: green; margin-top: 5px; font-size: 11px; background: #e8f5e9; padding: 2px 8px; border-radius: 10px;}
+        .points-awarded { font-weight: bold; color: green; margin-top: 5px; font-size: 12px; background: #e8f5e9; padding: 4px 8px; border-radius: 6px; text-align: center; line-height: 1.2; width: 100%;}
         
         .actions { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
         button.btn-main { background-color: #28a745; color: white; border: none; padding: 12px 20px; font-size: 15px; border-radius: 5px; cursor: pointer; font-weight: bold; flex: 1; min-width: 150px;}
@@ -279,42 +279,30 @@
     
     // --- BOTÃO GERADOR DE TESTES ALEATÓRIOS ---
     window.fillRandomData = function() {
-        if(!confirm("⚠️ AVISO: Isto vai gerar palpites aleatórios para todos os jogadores e resultados reais APENAS para a fase de grupos (para testares os cruzamentos). Avançar?")) return;
+        if(!confirm("⚠️ AVISO: Isto vai gerar palpites aleatórios para todos os jogadores e resultados reais APENAS para a fase de grupos. Avançar?")) return;
+        let randomScore = () => Math.floor(Math.random() * 4);
         
-        let randomScore = () => Math.floor(Math.random() * 4); // Gera 0 a 3 golos
-        
-        // Palpites Aleatórios para todos em todos os jogos
         ['p1', 'p2', 'p3', 'p4'].forEach(p => {
             allMatches.forEach(m => {
-                let g1 = randomScore();
-                let g2 = randomScore();
+                let g1 = randomScore(); let g2 = randomScore();
                 let adv = (m.isKO && g1 === g2) ? (Math.random() > 0.5 ? 't1' : 't2') : "";
                 state.preds[p][m.id] = {g1, g2, adv};
             });
         });
 
-        // Resultados Reais Aleatórios só para fase de Grupos (Para podermos ver os KO a gerar)
-        matches.forEach(m => {
-            state.actual[m.id] = {g1: randomScore(), g2: randomScore(), adv: ""};
-        });
-        
-        // Apaga os reais dos Knockouts para estar limpo
-        koMatches.forEach(m => {
-            state.actual[m.id] = {g1: "", g2: "", adv: ""};
-        });
+        matches.forEach(m => state.actual[m.id] = {g1: randomScore(), g2: randomScore(), adv: ""});
+        koMatches.forEach(m => state.actual[m.id] = {g1: "", g2: "", adv: ""});
 
         window.renderApp();
-        alert("✅ Magia Feita! Faz scroll para veres as tabelas feitas e os 16avos de final montados. (Clica em 'Gravar na Nuvem' se quiseres partilhar isto com os outros).");
+        alert("✅ Magia Feita! Faz scroll para veres as tabelas feitas e os 16avos de final montados.");
     }
 
     window.isMatchStarted = function(dateStr, timeStr) {
         let months = { "Jan":"01", "Feb":"02", "Mar":"03", "Apr":"04", "May":"05", "Jun":"06", "Jul":"07", "Aug":"08", "Sep":"09", "Oct":"10", "Nov":"11", "Dec":"12" };
         let parts = dateStr.split('-');
         let matchIso = `20${parts[2]}-${months[parts[1]]}-${parts[0].padStart(2,'0')}T${timeStr}:00`;
-        
         let matchDate = new Date(matchIso + "-04:00");
         let now = window.fakeTime ? new Date(window.fakeTime + "-04:00") : new Date();
-        
         return now >= matchDate;
     };
     // -------------------------
@@ -360,15 +348,10 @@
 
     window.renderApp = function() {
         let currentUser = document.getElementById('current-user').value;
-        
-        // Bloquear edição dos nomes se não for Admin
         ['p1', 'p2', 'p3', 'p4'].forEach(p => {
             let input = document.getElementById(`${p}-name`);
-            if (currentUser === 'admin') {
-                input.removeAttribute('disabled');
-            } else {
-                input.setAttribute('disabled', 'true');
-            }
+            if (currentUser === 'admin') input.removeAttribute('disabled');
+            else input.setAttribute('disabled', 'true');
         });
 
         window.updateDropdownNames();
@@ -442,14 +425,31 @@
         }
     }
 
-    function calcPts(m, p) {
+    // NOVA FUNÇÃO: Retorna os pontos e a razão (label)
+    function calcPtsDetails(m, p) {
         let act = state.actual[m.id], prd = state.preds[p][m.id];
-        if (!act || act.g1 === "" || act.g2 === "" || !prd || prd.g1 === "" || prd.g2 === "") return 0;
+        if (!act || act.g1 === "" || act.g2 === "" || !prd || prd.g1 === "" || prd.g2 === "") return {pts: 0, lbl: ""};
+        
         let a1 = parseInt(act.g1), a2 = parseInt(act.g2), p1 = parseInt(prd.g1), p2 = parseInt(prd.g2);
-        if (a1 === p1 && a2 === p2) return m.isKO ? CONFIG.KO_EXACT[m.phase] : CONFIG.GS_EXACT;
-        if ((p1 - p2) === (a1 - a2)) return m.isKO ? CONFIG.KO_GD[m.phase] : CONFIG.GS_GD;
-        if (Math.sign(p1 - p2) === Math.sign(a1 - a2)) return m.isKO ? CONFIG.KO_RESULT[m.phase] : CONFIG.GS_RESULT;
-        return 0;
+        let exact = (a1 === p1 && a2 === p2);
+        let gd = ((p1 - p2) === (a1 - a2));
+        let result = (Math.sign(p1 - p2) === Math.sign(a1 - a2));
+
+        if(!m.isKO) {
+            if(exact) return {pts: CONFIG.GS_EXACT, lbl: "Exato"};
+            if(gd) return {pts: CONFIG.GS_GD, lbl: "Dif. Golos"};
+            if(result) return {pts: CONFIG.GS_RESULT, lbl: "Resultado"};
+            return {pts: 0, lbl: ""};
+        } else {
+            if(exact) return {pts: CONFIG.KO_EXACT[m.phase], lbl: "Exato"};
+            if(gd) return {pts: CONFIG.KO_GD[m.phase], lbl: "Dif. Golos"};
+            if(result) return {pts: CONFIG.KO_RESULT[m.phase], lbl: "Resultado"};
+            return {pts: 0, lbl: ""};
+        }
+    }
+
+    function calcPts(m, p) {
+        return calcPtsDetails(m, p).pts;
     }
 
     function matchHTML(m) {
@@ -511,14 +511,17 @@
             playersHtml = ['p1','p2','p3','p4'].map(p => {
                 let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
                 let pTie = m.isKO && pr.g1 !== "" && pr.g1 == pr.g2;
+                let ptsDetails = calcPtsDetails(m, p);
                 
                 let predContent = `<div style="font-size:15px; padding: 5px; background: #eee; border-radius:4px; width:100%; text-align:center;"><b>${pr.g1!==""?pr.g1:'-'}</b> - <b>${pr.g2!==""?pr.g2:'-'}</b></div>
                 ${pTie && pr.adv ? `<div style="font-size:10px; color:#555; margin-top:2px; text-align:center;">P: ${pr.adv=='t1'?'Eq.1':'Eq.2'}</div>` : ''}`;
                 
+                let pointsDisplay = `<div class="points-awarded">${ptsDetails.pts} pts${ptsDetails.pts > 0 ? `<br><span style="font-weight:normal; font-size:9px; color:#666;">(${ptsDetails.lbl})</span>` : ''}</div>`;
+
                 return `<div class="player-pred">
                     <span>${document.getElementById(p+'-name').value}</span>
                     ${predContent}
-                    <div class="points-awarded">${calcPts(m,p)} pts</div>
+                    ${pointsDisplay}
                 </div>`;
             }).join('');
         }
