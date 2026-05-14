@@ -20,7 +20,8 @@
 
         .players-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;}
         .players-section label { display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: bold;}
-        input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: center; font-weight: bold; color: #d9534f;}
+        input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: center; font-weight: bold; color: #d9534f; transition: all 0.3s;}
+        input[type="text"]:disabled { background: #e9ecef; color: #555; border-color: #ddd; opacity: 1; }
         
         .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 20px;}
         .leaderboard { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px;}
@@ -37,7 +38,6 @@
         .standings-table .rank-1, .standings-table .rank-2 { background-color: #d4edda; font-weight: bold; } 
         .standings-table .rank-3 { background-color: #fff3cd; } 
 
-        /* NOVO LAYOUT DOS JOGOS (MOBILE FIRST) */
         .match-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
         .match-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
@@ -56,15 +56,13 @@
         input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         select.adv-select { font-size: 10px; padding: 2px; margin-top: 5px; width: 100%; max-width: 80px; background: #d4edda; border-color: #28a745; text-align: center;}
         
-        /* GRELHA DE PREVISÕES (2 por linha) */
         .predictions-section { margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .predictions-section.single-focus { grid-template-columns: 1fr; justify-items: center; } /* Quando só aparece o utilizador ativo */
+        .predictions-section.single-focus { grid-template-columns: 1fr; justify-items: center; } 
         
         .player-pred { display: flex; flex-direction: column; align-items: center; font-size: 12px; background: #fdfdfd; padding: 8px; border-radius: 6px; border: 1px solid #f0f0f0;}
         .player-pred > span { font-weight: bold; margin-bottom: 4px; color: #333; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .points-awarded { font-weight: bold; color: green; margin-top: 5px; font-size: 11px; background: #e8f5e9; padding: 2px 8px; border-radius: 10px;}
         
-        /* Botões */
         .actions { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
         button.btn-main { background-color: #28a745; color: white; border: none; padding: 12px 20px; font-size: 15px; border-radius: 5px; cursor: pointer; font-weight: bold; flex: 1; min-width: 150px;}
         button.btn-main:active { background-color: #218838; transform: scale(0.98);}
@@ -96,22 +94,23 @@
             </select>
         </div>
 
-        <div class="test-panel" style="display:none;" id="time-machine-container">
-            <b>⏱️ MÁQUINA DO TEMPO</b><br>
+        <div class="test-panel" id="time-machine-container">
+            <b>⏱️ MÁQUINA DO TEMPO (Modo Teste)</b><br>
             <input type="datetime-local" id="time-machine-input">
             <button onclick="window.setTimeMachine()">Viajar</button>
             <button onclick="window.resetTimeMachine()">Reset</button>
-            <div id="current-time-display" style="font-weight:bold; margin-top:5px;">Presente</div>
+            <div id="current-time-display" style="font-weight:bold; margin-top:5px; color:#c82333;">Tempo Presente</div>
         </div>
 
         <h1>🏆 Predictor 2026</h1>
         
         <div class="players-section">
-            <label>J1:<input type="text" id="p1-name" value="Jogador 1"></label>
-            <label>J2:<input type="text" id="p2-name" value="Jogador 2"></label>
-            <label>J3:<input type="text" id="p3-name" value="Jogador 3"></label>
-            <label>J4:<input type="text" id="p4-name" value="Jogador 4"></label>
+            <label>J1:<input type="text" id="p1-name" class="player-input" value="Jogador 1" disabled></label>
+            <label>J2:<input type="text" id="p2-name" class="player-input" value="Jogador 2" disabled></label>
+            <label>J3:<input type="text" id="p3-name" class="player-input" value="Jogador 3" disabled></label>
+            <label>J4:<input type="text" id="p4-name" class="player-input" value="Jogador 4" disabled></label>
         </div>
+        <p style="text-align:center; font-size:11px; color:#777; margin-top:-15px; margin-bottom:15px;">* Apenas o Administrador pode alterar os nomes</p>
 
         <h2>Classificação</h2>
         <div class="table-responsive">
@@ -133,7 +132,7 @@
 
         <div class="actions">
             <button class="btn-main" onclick="window.saveData()">💾 Gravar na Nuvem</button>
-            </div>
+        </div>
 
         <h2>Tabelas Grupos 
             <select id="standings-view-select" onchange="window.renderGroups()" style="font-size:14px; font-weight:bold; border:2px solid #0056b3; border-radius:5px; padding:3px;">
@@ -271,7 +270,7 @@
     window.resetTimeMachine = function() {
         window.fakeTime = null;
         document.getElementById('time-machine-input').value = "";
-        document.getElementById('current-time-display').innerText = "Hora Atual (Presente)";
+        document.getElementById('current-time-display').innerText = "Tempo Atual (Presente)";
         window.renderApp();
     }
 
@@ -327,6 +326,18 @@
     }
 
     window.renderApp = function() {
+        let currentUser = document.getElementById('current-user').value;
+        
+        // Bloquear edição dos nomes se não for Admin
+        ['p1', 'p2', 'p3', 'p4'].forEach(p => {
+            let input = document.getElementById(`${p}-name`);
+            if (currentUser === 'admin') {
+                input.removeAttribute('disabled');
+            } else {
+                input.setAttribute('disabled', 'true');
+            }
+        });
+
         window.updateDropdownNames();
         window.renderGroups();
         window.renderMatches();
@@ -546,7 +557,7 @@
 
     window.saveData = () => {
         state.names = ['p1','p2','p3','p4'].map(p => document.getElementById(p+'-name').value);
-        set(dbRef, state).then(() => alert("Palpites submetidos e gravados com sucesso! ☁️")).catch(e => alert("Erro: " + e));
+        set(dbRef, state).then(() => alert("Dados gravados com sucesso na Firebase! ☁️")).catch(e => alert("Erro: " + e));
     }
 </script>
 
