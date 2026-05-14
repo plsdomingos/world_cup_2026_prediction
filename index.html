@@ -99,6 +99,8 @@
             <input type="datetime-local" id="time-machine-input">
             <button onclick="window.setTimeMachine()">Viajar</button>
             <button onclick="window.resetTimeMachine()">Reset</button>
+            <hr style="border: 0; border-top: 1px dashed #ccc; margin: 8px 0;">
+            <button onclick="window.fillRandomData()" style="background:#17a2b8; color:white; border:none; border-radius:4px; font-weight:bold;">🎲 Gerar Dados Aleatórios</button>
             <div id="current-time-display" style="font-weight:bold; margin-top:5px; color:#c82333;">Tempo Presente</div>
         </div>
 
@@ -252,6 +254,7 @@
         { id: 'M103', date: '18-Jul-26', time: '17:00', venue: 'Hard Rock Stadium, Miami', t1_ref: 'L101', t2_ref: 'L102', phase: 'Third Place' }, { id: 'M104', date: '19-Jul-26', time: '15:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: 'W101', t2_ref: 'W102', phase: 'Final' }
     ].map(m => ({...m, isKO: true}));
 
+    let allMatches = [...matches, ...koMatches];
     let actualStandings = {};
     let state = { actual: {}, preds: {}, names: ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"] };
 
@@ -272,6 +275,36 @@
         document.getElementById('time-machine-input').value = "";
         document.getElementById('current-time-display').innerText = "Tempo Atual (Presente)";
         window.renderApp();
+    }
+    
+    // --- BOTÃO GERADOR DE TESTES ALEATÓRIOS ---
+    window.fillRandomData = function() {
+        if(!confirm("⚠️ AVISO: Isto vai gerar palpites aleatórios para todos os jogadores e resultados reais APENAS para a fase de grupos (para testares os cruzamentos). Avançar?")) return;
+        
+        let randomScore = () => Math.floor(Math.random() * 4); // Gera 0 a 3 golos
+        
+        // Palpites Aleatórios para todos em todos os jogos
+        ['p1', 'p2', 'p3', 'p4'].forEach(p => {
+            allMatches.forEach(m => {
+                let g1 = randomScore();
+                let g2 = randomScore();
+                let adv = (m.isKO && g1 === g2) ? (Math.random() > 0.5 ? 't1' : 't2') : "";
+                state.preds[p][m.id] = {g1, g2, adv};
+            });
+        });
+
+        // Resultados Reais Aleatórios só para fase de Grupos (Para podermos ver os KO a gerar)
+        matches.forEach(m => {
+            state.actual[m.id] = {g1: randomScore(), g2: randomScore(), adv: ""};
+        });
+        
+        // Apaga os reais dos Knockouts para estar limpo
+        koMatches.forEach(m => {
+            state.actual[m.id] = {g1: "", g2: "", adv: ""};
+        });
+
+        window.renderApp();
+        alert("✅ Magia Feita! Faz scroll para veres as tabelas feitas e os 16avos de final montados. (Clica em 'Gravar na Nuvem' se quiseres partilhar isto com os outros).");
     }
 
     window.isMatchStarted = function(dateStr, timeStr) {
