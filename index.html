@@ -258,7 +258,6 @@
     let actualStandings = {};
     let state = { actual: {}, preds: {}, names: ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"] };
 
-    // --- MÁQUINA DO TEMPO ---
     window.fakeTime = null;
 
     window.setTimeMachine = function() {
@@ -277,7 +276,6 @@
         window.renderApp();
     }
     
-    // --- BOTÃO GERADOR DE TESTES ALEATÓRIOS ---
     window.fillRandomData = function() {
         if(!confirm("⚠️ AVISO: Isto vai gerar palpites aleatórios para todos os jogadores e resultados reais APENAS para a fase de grupos. Avançar?")) return;
         let randomScore = () => Math.floor(Math.random() * 4);
@@ -305,7 +303,6 @@
         let now = window.fakeTime ? new Date(window.fakeTime + "-04:00") : new Date();
         return now >= matchDate;
     };
-    // -------------------------
 
     get(dbRef).then((snap) => {
         if(snap.exists()) state = snap.val();
@@ -464,7 +461,6 @@
         let started = window.isMatchStarted(m.date, m.time);
         let currentUser = document.getElementById('current-user').value;
         
-        // Render Resultados Reais
         let actualHtml = '';
         if (currentUser === 'admin') {
             actualHtml = `
@@ -482,7 +478,6 @@
             ${isTie && act.adv ? `<div style="font-size:10px; background:#d4edda; padding:2px; border-radius:3px; margin-top:2px;">P: ${act.adv=='t1'?t1.substring(0,4):t2.substring(0,4)}</div>` : ''}`;
         }
 
-        // Render Palpites Jogadores
         let playersHtml = '';
         
         if (!started) {
@@ -565,6 +560,13 @@
     window.updateLeaderboard = function() {
         actualStandings = getStandings(state.actual); let aQ = getQ(actualStandings);
         let koB = {p1:0, p2:0, p3:0, p4:0};
+        let koBDetails = {p1:[], p2:[], p3:[], p4:[]};
+        
+        let phaseNames = {
+            'Round of 32': '16avos', 'Round of 16': 'Oitavos', 'Quarter-finals': 'Quartos',
+            'Semi-finals': 'Meias', 'Third Place': '3º L.', 'Final': 'Final'
+        };
+
         [...new Set(koMatches.map(m=>m.phase))].forEach(ph => {
             let sc = {p1:0, p2:0, p3:0, p4:0}, rCount = 0;
             koMatches.filter(m=>m.phase==ph).forEach(m => {
@@ -574,20 +576,69 @@
             });
             if(rCount > 0) {
                 let uSc = [...new Set(Object.values(sc))].sort((a,b)=>b-a);
-                ['p1','p2','p3','p4'].forEach(p => { if(sc[p]==uSc[0] && uSc[0]>0) koB[p]+=CONFIG.KO_EXTRA_1ST; else if(sc[p]==uSc[1] && uSc[1]>0) koB[p]+=CONFIG.KO_EXTRA_2ND; });
+                ['p1','p2','p3','p4'].forEach(p => { 
+                    if(sc[p]==uSc[0] && uSc[0]>0) { koB[p]+=CONFIG.KO_EXTRA_1ST; koBDetails[p].push(`${phaseNames[ph]}: 1º`); }
+                    else if(sc[p]==uSc[1] && uSc[1]>0) { koB[p]+=CONFIG.KO_EXTRA_2ND; koBDetails[p].push(`${phaseNames[ph]}: 2º`); }
+                });
             }
         });
 
         let stats = ['p1','p2','p3','p4'].map(p => {
-            let gs=0, ko=0; matches.forEach(m=>gs+=calcPts(m,p)); koMatches.forEach(m=>ko+=calcPts(m,p));
+            let gs=0, ko=0; 
+            let koPhasePts = {};
+            
+            matches.forEach(m=>gs+=calcPts(m,p)); 
+            
+            koMatches.forEach(m=>{
+                let pts = calcPts(m,p);
+                ko+=pts;
+                if(pts > 0) {
+                    if(!koPhasePts[m.phase]) koPhasePts[m.phase] = 0;
+                    koPhasePts[m.phase] += pts;
+                }
+            });
+            
+            let koStr = Object.entries(koPhasePts).map(([k,v]) => `${phaseNames[k]}: ${v}`).join('<br>') || '-';
+
             let pS = getStandings(state.preds[p]), pQ = getQ(pS), b=0;
-            for(let g in groups) { if(actualStandings[g][0].p>0 && pS[g][0].name==actualStandings[g][0].name) b+=CONFIG.BONUS_WINNER; if(actualStandings[g][1].p>0 && pS[g][1].name==actualStandings[g][1].name) b+=CONFIG.BONUS_RUNNERUP; }
-            pQ.t8.forEach(t => { if(aQ.t8.includes(t)) b+=CONFIG.BONUS_BEST3RD; });
-            pQ.all.forEach(t => { if(aQ.all.includes(t)) b+=CONFIG.BONUS_QUALIFIED; });
-            return { n: document.getElementById(p+'-name').value, gs, b, ko, extra: koB[p], tot: gs+b+ko+koB[p] };
+            let bDet = {w:0, r:0, b3:0, q:0};
+            for(let g in groups) { 
+                if(actualStandings[g][0].p>0 && pS[g][0].name==actualStandings[g][0].name) { b+=CONFIG.BONUS_WINNER; bDet.w++; }
+                if(actualStandings[g][1].p>0 && pS[g][1].name==actualStandings[g][1].name) { b+=CONFIG.BONUS_RUNNERUP; bDet.r++; }
+            }
+            pQ.t8.forEach(t => { if(aQ.t8.includes(t)) { b+=CONFIG.BONUS_BEST3RD; bDet.b3++; } });
+            pQ.all.forEach(t => { if(aQ.all.includes(t)) { b+=CONFIG.BONUS_QUALIFIED; bDet.q++; } });
+            
+            let bStr = `1ºs: ${bDet.w}x | 2ºs: ${bDet.r}x<br>Melhor 3º: ${bDet.b3}x | Apur: ${bDet.q}x`;
+
+            return { 
+                n: document.getElementById(p+'-name').value, 
+                gs, 
+                b, bStr, 
+                ko, koStr, 
+                extra: koB[p], extraStr: koBDetails[p].join('<br>') || '-', 
+                tot: gs+b+ko+koB[p] 
+            };
         }).sort((a,b) => b.tot - a.tot);
 
-        document.getElementById('leaderboard-body').innerHTML = stats.map((s,i) => `<tr><td>${i+1}º</td><td>${s.n}</td><td style="font-size:16px; color:#d9534f;"><b>${s.tot}</b></td><td>${s.gs}</td><td><b style="color:green;">+${s.b}</b></td><td>${s.ko}</td><td><b style="color:green;">+${s.extra}</b></td></tr>`).join('');
+        document.getElementById('leaderboard-body').innerHTML = stats.map((s,i) => `<tr>
+            <td>${i+1}º</td>
+            <td>${s.n}</td>
+            <td style="font-size:16px; color:#d9534f;"><b>${s.tot}</b></td>
+            <td>${s.gs}</td>
+            <td>
+                <b style="color:green;">+${s.b}</b>
+                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.bStr}</div>
+            </td>
+            <td>
+                ${s.ko}
+                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.koStr}</div>
+            </td>
+            <td>
+                <b style="color:green;">+${s.extra}</b>
+                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.extraStr}</div>
+            </td>
+        </tr>`).join('');
     }
 
     window.saveData = () => {
