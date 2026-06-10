@@ -425,7 +425,6 @@
         }
     }
 
-    // NOVA FUNÇÃO: Retorna os pontos e a razão (label)
     function calcPtsDetails(m, p) {
         let act = state.actual[m.id], prd = state.preds[p][m.id];
         if (!act || act.g1 === "" || act.g2 === "" || !prd || prd.g1 === "" || prd.g2 === "") return {pts: 0, lbl: ""};
