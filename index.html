@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Predictor Mundial 2026 - Mobile Master</title>
+    <title>Predictor Mundial 2026 - Master Oficial</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 10px; }
@@ -12,13 +12,10 @@
         
         .container { max-width: 1350px; margin: auto; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         
-        .top-bar { background: #343a40; color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 10px; font-size: 15px; font-weight: bold; position: sticky; top: 0; z-index: 100;}
+        .top-bar { background: #343a40; color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 20px; font-size: 15px; font-weight: bold; position: sticky; top: 0; z-index: 100;}
         .top-bar select { font-size: 15px; padding: 5px; border-radius: 5px; border: 2px solid #ffc107; font-weight: bold; cursor: pointer; max-width: 100%;}
 
-        .test-panel { background: #fff3cd; color: #856404; padding: 10px; text-align: center; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffeeba; font-size: 12px; }
-        .test-panel input, .test-panel button { font-size: 12px; padding: 5px; margin: 2px; }
-
-        .players-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;}
+        .players-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;}
         .players-section label { display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: bold;}
         input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: center; font-weight: bold; color: #d9534f; transition: all 0.3s;}
         input[type="text"]:disabled { background: #e9ecef; color: #555; border-color: #ddd; opacity: 1; }
@@ -57,15 +54,10 @@
         select.adv-select { font-size: 10px; padding: 2px; margin-top: 5px; width: 100%; max-width: 80px; background: #d4edda; border-color: #28a745; text-align: center;}
         
         .predictions-section { margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .predictions-section.single-focus { grid-template-columns: 1fr; justify-items: center; } 
         
-        .player-pred { display: flex; flex-direction: column; align-items: center; font-size: 12px; background: #fdfdfd; padding: 8px; border-radius: 6px; border: 1px solid #f0f0f0;}
+        .player-pred { display: flex; flex-direction: column; align-items: center; font-size: 12px; background: #fdfdfd; padding: 8px; border-radius: 6px; border: 1px solid #f0f0f0; transition: border 0.3s;}
         .player-pred > span { font-weight: bold; margin-bottom: 4px; color: #333; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .points-awarded { font-weight: bold; color: green; margin-top: 5px; font-size: 12px; background: #e8f5e9; padding: 4px 8px; border-radius: 6px; text-align: center; line-height: 1.2; width: 100%;}
-        
-        .actions { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
-        button.btn-main { background-color: #28a745; color: white; border: none; padding: 12px 20px; font-size: 15px; border-radius: 5px; cursor: pointer; font-weight: bold; flex: 1; min-width: 150px;}
-        button.btn-main:active { background-color: #218838; transform: scale(0.98);}
         
         .toggle-btn { font-size: 14px; cursor: pointer; padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: #eee; }
         .collapsible-header { background: #343a40; color: white; padding: 12px; border-radius: 5px; margin-top: 15px; text-align: center; font-weight: bold; cursor: pointer; font-size: 15px;}
@@ -84,7 +76,7 @@
     <div id="app-content">
         <div class="top-bar">
             👤 Entrar como: 
-            <select id="current-user" onchange="window.renderApp()">
+            <select id="user-selector" onchange="window.handleUserChange()">
                 <option value="spectator" selected>Espectador (Ver Apenas)</option>
                 <option value="admin">⭐ Administrador</option>
                 <option value="p1">Jogador 1</option>
@@ -92,16 +84,6 @@
                 <option value="p3">Jogador 3</option>
                 <option value="p4">Jogador 4</option>
             </select>
-        </div>
-
-        <div class="test-panel" id="time-machine-container">
-            <b>⏱️ MÁQUINA DO TEMPO (Modo Teste)</b><br>
-            <input type="datetime-local" id="time-machine-input">
-            <button onclick="window.setTimeMachine()">Viajar</button>
-            <button onclick="window.resetTimeMachine()">Reset</button>
-            <hr style="border: 0; border-top: 1px dashed #ccc; margin: 8px 0;">
-            <button onclick="window.fillRandomData()" style="background:#17a2b8; color:white; border:none; border-radius:4px; font-weight:bold;">🎲 Gerar Dados Aleatórios</button>
-            <div id="current-time-display" style="font-weight:bold; margin-top:5px; color:#c82333;">Tempo Presente</div>
         </div>
 
         <h1>🏆 Predictor 2026</h1>
@@ -112,7 +94,7 @@
             <label>J3:<input type="text" id="p3-name" class="player-input" value="Jogador 3" disabled></label>
             <label>J4:<input type="text" id="p4-name" class="player-input" value="Jogador 4" disabled></label>
         </div>
-        <p style="text-align:center; font-size:11px; color:#777; margin-top:-15px; margin-bottom:15px;">* Apenas o Administrador pode alterar os nomes</p>
+        <p style="text-align:center; font-size:11px; color:#777; margin-top:-5px; margin-bottom:15px;">* Apenas o Administrador pode alterar os nomes. Guarda automaticamente.</p>
 
         <h2>Classificação</h2>
         <div class="table-responsive">
@@ -130,10 +112,6 @@
                 </thead>
                 <tbody id="leaderboard-body"></tbody>
             </table>
-        </div>
-
-        <div class="actions">
-            <button class="btn-main" onclick="window.saveData()">💾 Gravar na Nuvem</button>
         </div>
 
         <h2>Tabelas Grupos 
@@ -256,51 +234,17 @@
 
     let allMatches = [...matches, ...koMatches];
     let actualStandings = {};
-    let state = { actual: {}, preds: {}, names: ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"] };
-
-    window.fakeTime = null;
-
-    window.setTimeMachine = function() {
-        let val = document.getElementById('time-machine-input').value;
-        if(val) {
-            window.fakeTime = val;
-            document.getElementById('current-time-display').innerText = "🕰️ Futuro: " + new Date(val).toLocaleString();
-            window.renderApp();
-        }
-    }
-
-    window.resetTimeMachine = function() {
-        window.fakeTime = null;
-        document.getElementById('time-machine-input').value = "";
-        document.getElementById('current-time-display').innerText = "Tempo Atual (Presente)";
-        window.renderApp();
-    }
+    let state = { actual: {}, preds: {}, passwords: {}, names: ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"] };
     
-    window.fillRandomData = function() {
-        if(!confirm("⚠️ AVISO: Isto vai gerar palpites aleatórios para todos os jogadores e resultados reais APENAS para a fase de grupos. Avançar?")) return;
-        let randomScore = () => Math.floor(Math.random() * 4);
-        
-        ['p1', 'p2', 'p3', 'p4'].forEach(p => {
-            allMatches.forEach(m => {
-                let g1 = randomScore(); let g2 = randomScore();
-                let adv = (m.isKO && g1 === g2) ? (Math.random() > 0.5 ? 't1' : 't2') : "";
-                state.preds[p][m.id] = {g1, g2, adv};
-            });
-        });
-
-        matches.forEach(m => state.actual[m.id] = {g1: randomScore(), g2: randomScore(), adv: ""});
-        koMatches.forEach(m => state.actual[m.id] = {g1: "", g2: "", adv: ""});
-
-        window.renderApp();
-        alert("✅ Magia Feita! Faz scroll para veres as tabelas feitas e os 16avos de final montados.");
-    }
+    // VARIÁVEL GLOBAL PARA O UTILIZADOR ATIVO (Controla quem vê e escreve o quê)
+    window.currentUser = 'spectator';
 
     window.isMatchStarted = function(dateStr, timeStr) {
         let months = { "Jan":"01", "Feb":"02", "Mar":"03", "Apr":"04", "May":"05", "Jun":"06", "Jul":"07", "Aug":"08", "Sep":"09", "Oct":"10", "Nov":"11", "Dec":"12" };
         let parts = dateStr.split('-');
-        let matchIso = `20${parts[2]}-${months[parts[1]]}-${parts[0].padStart(2,'0')}T${timeStr}:00`;
-        let matchDate = new Date(matchIso + "-04:00");
-        let now = window.fakeTime ? new Date(window.fakeTime + "-04:00") : new Date();
+        let matchIso = `20${parts[2]}-${months[parts[1]]}-${parts[0].padStart(2,'0')}T${timeStr}:00-04:00`;
+        let matchDate = new Date(matchIso);
+        let now = new Date();
         return now >= matchDate;
     };
 
@@ -308,6 +252,7 @@
         if(snap.exists()) state = snap.val();
         if(!state.actual) state.actual = {};
         if(!state.preds) state.preds = {};
+        if(!state.passwords) state.passwords = {};
         ['p1', 'p2', 'p3', 'p4'].forEach(p => { if(!state.preds[p]) state.preds[p] = {}; });
         if(!state.names) state.names = ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"];
         init();
@@ -315,19 +260,70 @@
         console.error(e);
         if(!state.actual) state.actual = {};
         if(!state.preds) state.preds = { p1:{}, p2:{}, p3:{}, p4:{} };
+        if(!state.passwords) state.passwords = {};
         init();
     });
 
     function init() {
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('app-content').style.display = 'block';
-        window.resetTimeMachine();
         
         ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => {
             let input = document.getElementById(`${p}-name`);
             input.value = state.names[i];
-            input.oninput = () => { window.updateLeaderboard(); window.updateDropdownNames(); };
+            input.oninput = () => { 
+                state.names[i] = input.value;
+                window.updateLeaderboard(); 
+                window.updateDropdownNames(); 
+                window.autoSave();
+            };
         });
+        window.renderApp();
+    }
+
+    // --- AUTO SAVE PARA FIREBASE ---
+    window.autoSave = function() {
+        set(dbRef, state).catch(e => console.error("Erro a guardar no Firebase:", e));
+    }
+
+    // --- LÓGICA DE LOGIN COM PASSWORDS ---
+    window.handleUserChange = function() {
+        const sel = document.getElementById('user-selector');
+        const val = sel.value;
+
+        if (val === 'spectator') {
+            window.currentUser = 'spectator';
+        } else if (val === 'admin') {
+            let pwd = prompt("Password de Administrador:");
+            if (pwd === "picanha") {
+                window.currentUser = 'admin';
+            } else {
+                alert("Password incorreta!");
+                sel.value = window.currentUser || 'spectator';
+            }
+        } else {
+            // É um jogador: p1, p2, p3, p4
+            if (!state.passwords[val]) {
+                let pwd = prompt("Ainda não tens conta registada. Cria uma password agora para proteger as tuas apostas:");
+                if (pwd && pwd.trim() !== "") {
+                    state.passwords[val] = pwd;
+                    window.currentUser = val;
+                    window.autoSave();
+                    alert("Conta protegida com sucesso! Bem-vindo.");
+                } else {
+                    alert("Operação cancelada.");
+                    sel.value = window.currentUser || 'spectator';
+                }
+            } else {
+                let pwd = prompt("Insere a tua password:");
+                if (pwd === state.passwords[val]) {
+                    window.currentUser = val;
+                } else {
+                    alert("Password incorreta!");
+                    sel.value = window.currentUser || 'spectator';
+                }
+            }
+        }
         window.renderApp();
     }
 
@@ -335,7 +331,7 @@
 
     window.updateDropdownNames = function() {
         const selStandings = document.getElementById('standings-view-select');
-        const selUser = document.getElementById('current-user');
+        const selUser = document.getElementById('user-selector');
         ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => {
             let n = document.getElementById(`${p}-name`).value;
             if(selStandings) selStandings.options[i+1].text = "👁️ Previsão: " + n;
@@ -344,10 +340,9 @@
     }
 
     window.renderApp = function() {
-        let currentUser = document.getElementById('current-user').value;
         ['p1', 'p2', 'p3', 'p4'].forEach(p => {
             let input = document.getElementById(`${p}-name`);
-            if (currentUser === 'admin') input.removeAttribute('disabled');
+            if (window.currentUser === 'admin') input.removeAttribute('disabled');
             else input.setAttribute('disabled', 'true');
         });
 
@@ -459,10 +454,10 @@
         let isTie = m.isKO && act.g1 !== "" && act.g1 === act.g2;
         
         let started = window.isMatchStarted(m.date, m.time);
-        let currentUser = document.getElementById('current-user').value;
         
+        // Render Resultados Reais
         let actualHtml = '';
-        if (currentUser === 'admin') {
+        if (window.currentUser === 'admin') {
             actualHtml = `
             <div class="score-inputs">
                 <input type="number" onchange="window.upA('${m.id}','g1',this.value)" value="${act.g1}"> - 
@@ -478,47 +473,48 @@
             ${isTie && act.adv ? `<div style="font-size:10px; background:#d4edda; padding:2px; border-radius:3px; margin-top:2px;">P: ${act.adv=='t1'?t1.substring(0,4):t2.substring(0,4)}</div>` : ''}`;
         }
 
-        let playersHtml = '';
-        
-        if (!started) {
-            if (currentUser === 'admin' || currentUser === 'spectator') {
-                playersHtml = `<div style="grid-column: span 2; text-align: center; font-size: 13px; color: #888; padding: 10px; font-style: italic;">🔒 Apostas fechadas a aguardar início do jogo</div>`;
-            } else {
-                let p = currentUser;
-                let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
-                let pTie = m.isKO && pr.g1 !== "" && pr.g1 == pr.g2;
-                playersHtml = `
-                <div class="player-pred" style="grid-column: span 2; background: #eef2f5; border-color:#0056b3;">
-                    <span style="color:#0056b3;">A TUA APOSTA</span>
-                    <div class="score-inputs">
-                        <input type="number" onchange="window.upP('${p}','${m.id}','g1',this.value)" value="${pr.g1}"> - 
-                        <input type="number" onchange="window.upP('${p}','${m.id}','g2',this.value)" value="${pr.g2}">
-                    </div>
-                    ${pTie?`<select class="adv-select" onchange="window.upP('${p}','${m.id}','adv',this.value)">
-                        <option value="">Quem Passa?</option>
-                        <option value="t1" ${pr.adv=='t1'?'selected':''}>Equipa 1</option>
-                        <option value="t2" ${pr.adv=='t2'?'selected':''}>Equipa 2</option>
-                    </select>`:''}
-                </div>`;
-            }
-        } else {
-            playersHtml = ['p1','p2','p3','p4'].map(p => {
-                let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
-                let pTie = m.isKO && pr.g1 !== "" && pr.g1 == pr.g2;
-                let ptsDetails = calcPtsDetails(m, p);
-                
-                let predContent = `<div style="font-size:15px; padding: 5px; background: #eee; border-radius:4px; width:100%; text-align:center;"><b>${pr.g1!==""?pr.g1:'-'}</b> - <b>${pr.g2!==""?pr.g2:'-'}</b></div>
-                ${pTie && pr.adv ? `<div style="font-size:10px; color:#555; margin-top:2px; text-align:center;">P: ${pr.adv=='t1'?'Eq.1':'Eq.2'}</div>` : ''}`;
-                
-                let pointsDisplay = `<div class="points-awarded">${ptsDetails.pts} pts${ptsDetails.pts > 0 ? `<br><span style="font-weight:normal; font-size:9px; color:#666;">(${ptsDetails.lbl})</span>` : ''}</div>`;
+        // Render Palpites Jogadores
+        let playersHtml = ['p1','p2','p3','p4'].map(p => {
+            let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
+            let pTie = m.isKO && pr.g1 !== "" && pr.g1 == pr.g2;
+            let ptsDetails = calcPtsDetails(m, p);
+            
+            let canEdit = (!started && window.currentUser === p);
+            let canView = (started || window.currentUser === p); 
+            
+            let predContent = '';
+            let pointsDisplay = '';
 
-                return `<div class="player-pred">
-                    <span>${document.getElementById(p+'-name').value}</span>
-                    ${predContent}
-                    ${pointsDisplay}
-                </div>`;
-            }).join('');
-        }
+            if (canEdit) {
+                // Apenas a pessoa vê os seus proprios inputs antes do jogo
+                predContent = `
+                <div class="score-inputs">
+                    <input type="number" onchange="window.upP('${p}','${m.id}','g1',this.value)" value="${pr.g1}"> - 
+                    <input type="number" onchange="window.upP('${p}','${m.id}','g2',this.value)" value="${pr.g2}">
+                </div>
+                ${pTie?`<select class="adv-select" onchange="window.upP('${p}','${m.id}','adv',this.value)">
+                    <option value="">Quem Passa?</option>
+                    <option value="t1" ${pr.adv=='t1'?'selected':''}>Equipa 1</option>
+                    <option value="t2" ${pr.adv=='t2'?'selected':''}>Equipa 2</option>
+                </select>`:''}`;
+            } else if (canView) {
+                // Todos vêem quando o jogo começa (ou eu vejo o meu)
+                predContent = `<div style="font-size:15px; padding: 5px; background: #eee; border-radius:4px; width:100%; text-align:center;"><b>${pr.g1!==""?pr.g1:'-'}</b> - <b>${pr.g2!==""?pr.g2:'-'}</b></div>
+                ${pTie && pr.adv ? `<div style="font-size:10px; color:#555; margin-top:2px; text-align:center;">P: ${pr.adv=='t1'?'Eq.1':'Eq.2'}</div>` : ''}`;
+                pointsDisplay = `<div class="points-awarded">${ptsDetails.pts} pts${ptsDetails.pts > 0 ? `<br><span style="font-weight:normal; font-size:9px; color:#666;">(${ptsDetails.lbl})</span>` : ''}</div>`;
+            } else {
+                // Antes do jogo começar, vemos quem já apostou ou não
+                let hasBet = pr.g1 !== "" && pr.g2 !== "";
+                predContent = `<div style="font-size:12px; padding:8px 2px; text-align:center; color:${hasBet?'#28a745':'#888'}; font-weight:bold; background:#f8f9fa; border:1px dashed #ccc; border-radius:4px; width:100%;">${hasBet ? '✅ Apostou' : '⏳ Em falta'}</div>`;
+            }
+
+            return `
+            <div class="player-pred" ${canEdit ? 'style="border: 2px solid #0056b3; background:#eef2f5;"' : ''}>
+                <span ${canEdit ? 'style="color:#0056b3;"' : ''}>${document.getElementById(p+'-name').value}</span>
+                ${predContent}
+                ${pointsDisplay}
+            </div>`;
+        }).join('');
 
         return `<div class="match-card">
             <div class="match-header">${matchHeader}</div>
@@ -530,7 +526,7 @@
                 </div>
                 <div class="${t2Class}">${t2}</div>
             </div>
-            <div class="predictions-section ${(!started && (currentUser!=='admin' && currentUser!=='spectator')) ? 'single-focus' : ''}">
+            <div class="predictions-section">
                 ${playersHtml}
             </div>
         </div>`;
@@ -554,8 +550,27 @@
         }
     }
 
-    window.upA = (id, k, v) => { if(!state.actual[id]) state.actual[id]={g1:"",g2:"",adv:""}; state.actual[id][k]=v; window.renderApp(); }
-    window.upP = (p, id, k, v) => { if(!state.preds[p][id]) state.preds[p][id]={g1:"",g2:"",adv:""}; state.preds[p][id][k]=v; window.renderApp(); }
+    window.upA = (id, k, v) => { 
+        if(!state.actual[id]) state.actual[id]={g1:"",g2:"",adv:""}; 
+        state.actual[id][k]=v; 
+        if (state.actual[id].g1 !== state.actual[id].g2) state.actual[id].adv = ""; 
+        window.autoSave();
+        window.renderApp(); 
+    }
+    
+    window.upP = (p, id, k, v) => { 
+        if(!state.preds[p][id]) state.preds[p][id]={g1:"",g2:"",adv:""}; 
+        state.preds[p][id][k]=v; 
+        window.autoSave();
+        
+        if(parseInt(id.replace('M','')) <= 72) {
+            window.renderMatches();
+            if(document.getElementById('standings-view-select').value === p) window.renderGroups();
+        } else {
+            window.renderKnockouts();
+        }
+        window.updateLeaderboard(); 
+    }
 
     window.updateLeaderboard = function() {
         actualStandings = getStandings(state.actual); let aQ = getQ(actualStandings);
@@ -639,11 +654,6 @@
                 <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.extraStr}</div>
             </td>
         </tr>`).join('');
-    }
-
-    window.saveData = () => {
-        state.names = ['p1','p2','p3','p4'].map(p => document.getElementById(p+'-name').value);
-        set(dbRef, state).then(() => alert("Dados gravados com sucesso na Firebase! ☁️")).catch(e => alert("Erro: " + e));
     }
 </script>
 
