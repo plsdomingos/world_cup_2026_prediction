@@ -211,7 +211,34 @@
         ["K", "27-Jun-26", "Colombia", "Portugal", "19:30", "Hard Rock Stadium, Miami"], ["K", "27-Jun-26", "Congo DR", "Uzbekistan", "19:30", "Mercedes-Benz Stadium, Atlanta"]
     ];
 
-    let matches = rawMatches.map((m, i) => ({ id: `M${i+1}`, group: m[0], date: m[1], t1: m[2], t2: m[3], time: m[4], venue: m[5], isKO: false }));
+    function parseAndShiftToPT(dateStr, timeStr) {
+        const months = { "Jan":0, "Feb":1, "Mar":2, "Apr":3, "May":4, "Jun":5, "Jul":6, "Aug":7, "Sep":8, "Oct":9, "Nov":10, "Dec":11 };
+        const monthsArr = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        
+        let parts = dateStr.split('-');
+        let day = parseInt(parts[0]);
+        let month = months[parts[1]];
+        let year = 2000 + parseInt(parts[2]);
+        
+        let timeParts = timeStr.split(':');
+        let hours = parseInt(timeParts[0]);
+        let minutes = parseInt(timeParts[1]);
+        
+        let d = new Date(Date.UTC(year, month, day, hours, minutes));
+        d.setUTCHours(d.getUTCHours() + 5);
+        
+        let newDay = d.getUTCDate();
+        let newMonth = monthsArr[d.getUTCMonth()];
+        let newYear = String(d.getUTCFullYear()).substring(2);
+        let newTime = String(d.getUTCHours()).padStart(2, '0') + ":" + String(d.getUTCMinutes()).padStart(2, '0');
+        
+        return { date: `${newDay}-${newMonth}-${newYear}`, time: newTime };
+    }
+
+    let matches = rawMatches.map((m, i) => {
+        let pt = parseAndShiftToPT(m[1], m[4]);
+        return { id: `M${i+1}`, group: m[0], date: pt.date, t1: m[2], t2: m[3], time: pt.time, venue: m[5], isKO: false };
+    });
     
     const koMatches = [
         { id: 'M73', date: '28-Jun-26', time: '15:00', venue: 'SoFi Stadium, Los Angeles', t1_ref: '2A', t2_ref: '2B', phase: 'Round of 32' }, { id: 'M74', date: '29-Jun-26', time: '16:30', venue: 'Gillette Stadium, Boston', t1_ref: '1E', t2_ref: '3_0', phase: 'Round of 32' },
@@ -230,22 +257,30 @@
         { id: 'M99', date: '11-Jul-26', time: '17:00', venue: 'Hard Rock Stadium, Miami', t1_ref: 'W91', t2_ref: 'W92', phase: 'Quarter-finals' }, { id: 'M100', date: '11-Jul-26', time: '21:00', venue: 'Arrowhead Stadium, Kansas City', t1_ref: 'W95', t2_ref: 'W96', phase: 'Quarter-finals' },
         { id: 'M101', date: '14-Jul-26', time: '15:00', venue: 'AT&T Stadium, Dallas', t1_ref: 'W97', t2_ref: 'W98', phase: 'Semi-finals' }, { id: 'M102', date: '15-Jul-26', time: '15:00', venue: 'Mercedes-Benz Stadium, Atlanta', t1_ref: 'W99', t2_ref: 'W100', phase: 'Semi-finals' },
         { id: 'M103', date: '18-Jul-26', time: '17:00', venue: 'Hard Rock Stadium, Miami', t1_ref: 'L101', t2_ref: 'L102', phase: 'Third Place' }, { id: 'M104', date: '19-Jul-26', time: '15:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: 'W101', t2_ref: 'W102', phase: 'Final' }
-    ].map(m => ({...m, isKO: true}));
+    ].map(m => {
+        let pt = parseAndShiftToPT(m.date, m.time);
+        return {...m, date: pt.date, time: pt.time, isKO: true};
+    });
 
     let allMatches = [...matches, ...koMatches];
     let actualStandings = {};
     let state = { actual: {}, preds: {}, passwords: {}, names: ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4"] };
     
-    // VARIÁVEL GLOBAL PARA O UTILIZADOR ATIVO (Controla quem vê e escreve o quê)
     window.currentUser = 'spectator';
 
     window.isMatchStarted = function(dateStr, timeStr) {
         let months = { "Jan":"01", "Feb":"02", "Mar":"03", "Apr":"04", "May":"05", "Jun":"06", "Jul":"07", "Aug":"08", "Sep":"09", "Oct":"10", "Nov":"11", "Dec":"12" };
         let parts = dateStr.split('-');
-        let matchIso = `20${parts[2]}-${months[parts[1]]}-${parts[0].padStart(2,'0')}T${timeStr}:00-04:00`;
+        let matchIso = `20${parts[2]}-${months[parts[1]]}-${parts[0].padStart(2,'0')}T${timeStr}:00+01:00`;
         let matchDate = new Date(matchIso);
         let now = new Date();
         return now >= matchDate;
+    };
+
+    window.isGroupStageFinished = function() {
+        let lastGroupMatch = matches.find(m => m.id === 'M72');
+        if (!lastGroupMatch) return false;
+        return window.isMatchStarted(lastGroupMatch.date, lastGroupMatch.time);
     };
 
     get(dbRef).then((snap) => {
@@ -281,12 +316,10 @@
         window.renderApp();
     }
 
-    // --- AUTO SAVE PARA FIREBASE ---
     window.autoSave = function() {
         set(dbRef, state).catch(e => console.error("Erro a guardar no Firebase:", e));
     }
 
-    // --- LÓGICA DE LOGIN COM PASSWORDS ---
     window.handleUserChange = function() {
         const sel = document.getElementById('user-selector');
         const val = sel.value;
@@ -302,7 +335,6 @@
                 sel.value = window.currentUser || 'spectator';
             }
         } else {
-            // É um jogador: p1, p2, p3, p4
             if (!state.passwords[val]) {
                 let pwd = prompt("Ainda não tens conta registada. Cria uma password agora para proteger as tuas apostas:");
                 if (pwd && pwd.trim() !== "") {
@@ -332,9 +364,20 @@
     window.updateDropdownNames = function() {
         const selStandings = document.getElementById('standings-view-select');
         const selUser = document.getElementById('user-selector');
+        let isGSFinished = window.isGroupStageFinished();
+        
         ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => {
             let n = document.getElementById(`${p}-name`).value;
-            if(selStandings) selStandings.options[i+1].text = "👁️ Previsão: " + n;
+            if(selStandings) {
+                selStandings.options[i+1].text = "👁️ Previsão: " + n;
+                if (!isGSFinished && window.currentUser !== 'admin' && window.currentUser !== p) {
+                    selStandings.options[i+1].disabled = true;
+                    selStandings.options[i+1].style.display = 'none';
+                } else {
+                    selStandings.options[i+1].disabled = false;
+                    selStandings.options[i+1].style.display = 'block';
+                }
+            }
             if(selUser) selUser.options[i+2].text = n;
         });
     }
@@ -408,6 +451,12 @@
     window.renderGroups = () => {
         actualStandings = getStandings(state.actual);
         let src = document.getElementById('standings-view-select').value;
+        
+        if (src !== 'actual' && !window.isGroupStageFinished() && window.currentUser !== 'admin' && window.currentUser !== src) {
+            document.getElementById('standings-view-select').value = 'actual';
+            src = 'actual';
+        }
+        
         let st = src === 'actual' ? actualStandings : getStandings(state.preds[src]);
         const container = document.getElementById('groups-container');
         container.innerHTML = '';
@@ -448,14 +497,13 @@
         let t2 = m.isKO ? resolve(m.t2_ref) : m.t2;
         let t1Class = t1.includes("(") ? "team-name tbd" : "team-name";
         let t2Class = t2.includes("(") ? "team-name away tbd" : "team-name away";
-        let matchHeader = m.isKO ? `${m.date} | ${m.time} EST | ID: ${m.id}` : `Grupo ${m.group} | ${m.date} | ${m.time} EST`;
+        let matchHeader = m.isKO ? `${m.date} | ${m.time} (Hora PT) | ID: ${m.id}` : `Grupo ${m.group} | ${m.date} | ${m.time} (Hora PT)`;
         
         let act = state.actual[m.id] || {g1:"", g2:"", adv:""};
         let isTie = m.isKO && act.g1 !== "" && act.g1 === act.g2;
         
         let started = window.isMatchStarted(m.date, m.time);
         
-        // Render Resultados Reais
         let actualHtml = '';
         if (window.currentUser === 'admin') {
             actualHtml = `
@@ -473,7 +521,6 @@
             ${isTie && act.adv ? `<div style="font-size:10px; background:#d4edda; padding:2px; border-radius:3px; margin-top:2px;">P: ${act.adv=='t1'?t1.substring(0,4):t2.substring(0,4)}</div>` : ''}`;
         }
 
-        // Render Palpites Jogadores
         let playersHtml = ['p1','p2','p3','p4'].map(p => {
             let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
             let pTie = m.isKO && pr.g1 !== "" && pr.g1 == pr.g2;
@@ -486,7 +533,6 @@
             let pointsDisplay = '';
 
             if (canEdit) {
-                // Apenas a pessoa vê os seus proprios inputs antes do jogo
                 predContent = `
                 <div class="score-inputs">
                     <input type="number" onchange="window.upP('${p}','${m.id}','g1',this.value)" value="${pr.g1}"> - 
@@ -498,12 +544,10 @@
                     <option value="t2" ${pr.adv=='t2'?'selected':''}>Equipa 2</option>
                 </select>`:''}`;
             } else if (canView) {
-                // Todos vêem quando o jogo começa (ou eu vejo o meu)
                 predContent = `<div style="font-size:15px; padding: 5px; background: #eee; border-radius:4px; width:100%; text-align:center;"><b>${pr.g1!==""?pr.g1:'-'}</b> - <b>${pr.g2!==""?pr.g2:'-'}</b></div>
                 ${pTie && pr.adv ? `<div style="font-size:10px; color:#555; margin-top:2px; text-align:center;">P: ${pr.adv=='t1'?'Eq.1':'Eq.2'}</div>` : ''}`;
                 pointsDisplay = `<div class="points-awarded">${ptsDetails.pts} pts${ptsDetails.pts > 0 ? `<br><span style="font-weight:normal; font-size:9px; color:#666;">(${ptsDetails.lbl})</span>` : ''}</div>`;
             } else {
-                // Antes do jogo começar, vemos quem já apostou ou não
                 let hasBet = pr.g1 !== "" && pr.g2 !== "";
                 predContent = `<div style="font-size:12px; padding:8px 2px; text-align:center; color:${hasBet?'#28a745':'#888'}; font-weight:bold; background:#f8f9fa; border:1px dashed #ccc; border-radius:4px; width:100%;">${hasBet ? '✅ Apostou' : '⏳ Em falta'}</div>`;
             }
@@ -627,6 +671,7 @@
             let bStr = `1ºs: ${bDet.w}x | 2ºs: ${bDet.r}x<br>Melhor 3º: ${bDet.b3}x | Apur: ${bDet.q}x`;
 
             return { 
+                id: p,
                 n: document.getElementById(p+'-name').value, 
                 gs, 
                 b, bStr, 
@@ -636,24 +681,27 @@
             };
         }).sort((a,b) => b.tot - a.tot);
 
-        document.getElementById('leaderboard-body').innerHTML = stats.map((s,i) => `<tr>
-            <td>${i+1}º</td>
-            <td>${s.n}</td>
-            <td style="font-size:16px; color:#d9534f;"><b>${s.tot}</b></td>
-            <td>${s.gs}</td>
-            <td>
-                <b style="color:green;">+${s.b}</b>
-                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.bStr}</div>
-            </td>
-            <td>
-                ${s.ko}
-                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.koStr}</div>
-            </td>
-            <td>
-                <b style="color:green;">+${s.extra}</b>
-                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.extraStr}</div>
-            </td>
-        </tr>`).join('');
+        let isGSFinished = window.isGroupStageFinished();
+
+        document.getElementById('leaderboard-body').innerHTML = stats.map((s,i) => {
+            let showPoints = isGSFinished || window.currentUser === 'admin' || window.currentUser === s.id;
+            
+            return `<tr>
+                <td>${i+1}º</td>
+                <td>${s.n}</td>
+                <td style="font-size:16px; color:#d9534f;"><b>${showPoints ? s.tot : '-'}</b></td>
+                <td>${showPoints ? s.gs : '-'}</td>
+                <td>
+                    ${showPoints ? `<b style="color:green;">+${s.b}</b><div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.bStr}</div>` : '-'}
+                </td>
+                <td>
+                    ${showPoints ? `${s.ko}<div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.koStr}</div>` : '-'}
+                </td>
+                <td>
+                    ${showPoints ? `<b style="color:green;">+${s.extra}</b><div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.extraStr}</div>` : '-'}
+                </td>
+            </tr>`;
+        }).join('');
     }
 </script>
 
