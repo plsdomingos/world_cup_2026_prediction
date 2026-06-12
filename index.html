@@ -78,7 +78,7 @@
             👤 Entrar como: 
             <select id="user-selector" onchange="window.handleUserChange()">
                 <option value="spectator" selected>Espectador (Ver Apenas)</option>
-                <option value="admin">⭐ Administrador</option>
+                <option value="admin">⭐ Administrador (Resultados Reais)</option>
                 <option value="p1">Jogador 1</option>
                 <option value="p2">Jogador 2</option>
                 <option value="p3">Jogador 3</option>
@@ -117,10 +117,6 @@
         <h2>Tabelas Grupos 
             <select id="standings-view-select" onchange="window.renderGroups()" style="font-size:14px; font-weight:bold; border:2px solid #0056b3; border-radius:5px; padding:3px;">
                 <option value="actual">📊 Realidade</option>
-                <option value="p1">👁️ Previsão: J1</option>
-                <option value="p2">👁️ Previsão: J2</option>
-                <option value="p3">👁️ Previsão: J3</option>
-                <option value="p4">👁️ Previsão: J4</option>
             </select>
             <button class="toggle-btn" onclick="window.toggleSection('groups-wrapper')">👁️</button>
         </h2>
@@ -169,7 +165,7 @@
         E: ["Germany", "Curaçao", "Ivory Coast", "Ecuador"], F: ["Netherlands", "Japan", "Sweden", "Tunisia"],
         G: ["Belgium", "Egypt", "Iran", "New Zealand"], H: ["Spain", "Cape Verde", "Saudi Arabia", "Uruguay"],
         I: ["France", "Senegal", "Iraq", "Norway"], J: ["Argentina", "Algeria", "Austria", "Jordan"],
-        K: ["Portugal", "Congo DR", "Uzbekistan", "Colombia"], L: ["England", "Croatia", "Ghana", "Panama"]
+        K: ["Portugal", "Congo DR", "Uzistan", "Colombia"], L: ["England", "Croatia", "Ghana", "Panama"]
     };
 
     const rawMatches = [
@@ -184,7 +180,7 @@
         ["I", "16-Jun-26", "France", "Senegal", "15:00", "MetLife Stadium, New York/New Jersey"], ["I", "16-Jun-26", "Iraq", "Norway", "18:00", "Gillette Stadium, Boston"],
         ["J", "16-Jun-26", "Argentina", "Algeria", "21:00", "Arrowhead Stadium, Kansas City"], ["J", "16-Jun-26", "Austria", "Jordan", "00:00", "Levi's Stadium, San Francisco Bay Area"],
         ["L", "17-Jun-26", "Ghana", "Panama", "19:00", "BMO Field, Toronto"], ["L", "17-Jun-26", "England", "Croatia", "16:00", "AT&T Stadium, Dallas"],
-        ["K", "17-Jun-26", "Portugal", "Congo DR", "13:00", "NRG Stadium, Houston"], ["K", "17-Jun-26", "Uzbekistan", "Colombia", "22:00", "Estadio Azteca, Mexico City"],
+        ["K", "17-Jun-26", "Portugal", "Congo DR", "13:00", "NRG Stadium, Houston"], ["K", "17-Jun-26", "Uzistan", "Colombia", "22:00", "Estadio Azteca, Mexico City"],
         ["A", "18-Jun-26", "Czechia", "South Africa", "12:00", "Mercedes-Benz Stadium, Atlanta"], ["B", "18-Jun-26", "Switzerland", "Bosnia and Herzegovina", "15:00", "SoFi Stadium, Los Angeles"],
         ["B", "18-Jun-26", "Canada", "Qatar", "18:00", "BC Place, Vancouver"], ["A", "18-Jun-26", "Mexico", "South Korea", "21:00", "Estadio Akron, Guadalajara"],
         ["C", "19-Jun-26", "Brazil", "Haiti", "21:00", "Lincoln Financial Field, Philadelphia"], ["C", "19-Jun-26", "Scotland", "Morocco", "18:00", "Gillette Stadium, Boston"],
@@ -196,7 +192,7 @@
         ["I", "22-Jun-26", "Norway", "Senegal", "20:00", "MetLife Stadium, New York/New Jersey"], ["I", "22-Jun-26", "France", "Iraq", "17:00", "Lincoln Financial Field, Philadelphia"],
         ["J", "22-Jun-26", "Argentina", "Austria", "13:00", "AT&T Stadium, Dallas"], ["J", "22-Jun-26", "Jordan", "Algeria", "23:00", "Levi's Stadium, San Francisco Bay Area"],
         ["L", "23-Jun-26", "England", "Ghana", "16:00", "Gillette Stadium, Boston"], ["L", "23-Jun-26", "Panama", "Croatia", "19:00", "BMO Field, Toronto"],
-        ["K", "23-Jun-26", "Portugal", "Uzbekistan", "13:00", "NRG Stadium, Houston"], ["K", "23-Jun-26", "Colombia", "Congo DR", "22:00", "Estadio Akron, Guadalajara"],
+        ["K", "23-Jun-26", "Portugal", "Uzistan", "13:00", "NRG Stadium, Houston"], ["K", "23-Jun-26", "Colombia", "Congo DR", "22:00", "Estadio Akron, Guadalajara"],
         ["C", "24-Jun-26", "Scotland", "Brazil", "18:00", "Hard Rock Stadium, Miami"], ["C", "24-Jun-26", "Morocco", "Haiti", "18:00", "Mercedes-Benz Stadium, Atlanta"],
         ["B", "24-Jun-26", "Switzerland", "Canada", "15:00", "BC Place, Vancouver"], ["B", "24-Jun-26", "Bosnia and Herzegovina", "Qatar", "15:00", "Lumen Field, Seattle"],
         ["A", "24-Jun-26", "Czechia", "Mexico", "21:00", "Estadio Azteca, Mexico City"], ["A", "24-Jun-26", "South Africa", "South Korea", "21:00", "Estadio BBVA, Monterrey"],
@@ -208,39 +204,10 @@
         ["H", "26-Jun-26", "Cape Verde", "Saudi Arabia", "20:00", "NRG Stadium, Houston"], ["H", "26-Jun-26", "Uruguay", "Spain", "20:00", "Estadio Akron, Guadalajara"],
         ["L", "27-Jun-26", "Panama", "England", "17:00", "MetLife Stadium, New York/New Jersey"], ["L", "27-Jun-26", "Croatia", "Ghana", "17:00", "Lincoln Financial Field, Philadelphia"],
         ["J", "27-Jun-26", "Algeria", "Austria", "22:00", "Arrowhead Stadium, Kansas City"], ["J", "27-Jun-26", "Jordan", "Argentina", "22:00", "AT&T Stadium, Dallas"],
-        ["K", "27-Jun-26", "Colombia", "Portugal", "19:30", "Hard Rock Stadium, Miami"], ["K", "27-Jun-26", "Congo DR", "Uzbekistan", "19:30", "Mercedes-Benz Stadium, Atlanta"]
+        ["K", "27-Jun-26", "Colombia", "Portugal", "19:30", "Hard Rock Stadium, Miami"], ["K", "27-Jun-26", "Congo DR", "Uzistan", "19:30", "Mercedes-Benz Stadium, Atlanta"]
     ];
 
-    function parseAndShiftToPT(dateStr, timeStr) {
-        const months = { "Jan":0, "Feb":1, "Mar":2, "Apr":3, "May":4, "Jun":5, "Jul":6, "Aug":7, "Sep":8, "Oct":9, "Nov":10, "Dec":11 };
-        const monthsArr = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        
-        let parts = dateStr.split('-');
-        let day = parseInt(parts[0]);
-        let month = months[parts[1]];
-        let year = 2000 + parseInt(parts[2]);
-        
-        let timeParts = timeStr.split(':');
-        let hours = parseInt(timeParts[0]);
-        let minutes = parseInt(timeParts[1]);
-        
-        let d = new Date(Date.UTC(year, month, day, hours, minutes));
-        d.setUTCHours(d.getUTCHours() + 5);
-        
-        let newDay = d.getUTCDate();
-        let newMonth = monthsArr[d.getUTCMonth()];
-        let newYear = String(d.getUTCFullYear()).substring(2);
-        let newTime = String(d.getUTCHours()).padStart(2, '0') + ":" + String(d.getUTCMinutes()).padStart(2, '0');
-        
-        return { date: `${newDay}-${newMonth}-${newYear}`, time: newTime };
-    }
-
-    let matches = rawMatches.map((m, i) => {
-        let pt = parseAndShiftToPT(m[1], m[4]);
-        return { id: `M${i+1}`, group: m[0], date: pt.date, t1: m[2], t2: m[3], time: pt.time, venue: m[5], isKO: false };
-    });
-    
-    const koMatches = [
+    const koMatchesRaw = [
         { id: 'M73', date: '28-Jun-26', time: '15:00', venue: 'SoFi Stadium, Los Angeles', t1_ref: '2A', t2_ref: '2B', phase: 'Round of 32' }, { id: 'M74', date: '29-Jun-26', time: '16:30', venue: 'Gillette Stadium, Boston', t1_ref: '1E', t2_ref: '3_0', phase: 'Round of 32' },
         { id: 'M75', date: '29-Jun-26', time: '21:00', venue: 'Estadio BBVA, Monterrey', t1_ref: '1F', t2_ref: '2C', phase: 'Round of 32' }, { id: 'M76', date: '29-Jun-26', time: '13:00', venue: 'NRG Stadium, Houston', t1_ref: '1C', t2_ref: '2F', phase: 'Round of 32' },
         { id: 'M77', date: '30-Jun-26', time: '17:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: '1I', t2_ref: '3_1', phase: 'Round of 32' }, { id: 'M78', date: '30-Jun-26', time: '13:00', venue: 'AT&T Stadium, Dallas', t1_ref: '2E', t2_ref: '2I', phase: 'Round of 32' },
@@ -257,9 +224,38 @@
         { id: 'M99', date: '11-Jul-26', time: '17:00', venue: 'Hard Rock Stadium, Miami', t1_ref: 'W91', t2_ref: 'W92', phase: 'Quarter-finals' }, { id: 'M100', date: '11-Jul-26', time: '21:00', venue: 'Arrowhead Stadium, Kansas City', t1_ref: 'W95', t2_ref: 'W96', phase: 'Quarter-finals' },
         { id: 'M101', date: '14-Jul-26', time: '15:00', venue: 'AT&T Stadium, Dallas', t1_ref: 'W97', t2_ref: 'W98', phase: 'Semi-finals' }, { id: 'M102', date: '15-Jul-26', time: '15:00', venue: 'Mercedes-Benz Stadium, Atlanta', t1_ref: 'W99', t2_ref: 'W100', phase: 'Semi-finals' },
         { id: 'M103', date: '18-Jul-26', time: '17:00', venue: 'Hard Rock Stadium, Miami', t1_ref: 'L101', t2_ref: 'L102', phase: 'Third Place' }, { id: 'M104', date: '19-Jul-26', time: '15:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: 'W101', t2_ref: 'W102', phase: 'Final' }
-    ].map(m => {
-        let pt = parseAndShiftToPT(m.date, m.time);
-        return {...m, date: pt.date, time: pt.time, isKO: true};
+    ];
+
+    function convertESTtoPT(dateStr, timeStr) {
+        let monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        let parts = dateStr.split('-');
+        let day = parseInt(parts[0]);
+        let mIdx = monthNames.indexOf(parts[1]);
+        let year = parseInt(parts[2]);
+        let tParts = timeStr.split(':');
+        let h = parseInt(tParts[0]);
+        let m = tParts[1];
+        
+        h += 5; 
+        if (h >= 24) {
+            h -= 24;
+            day += 1;
+            if (mIdx === 5 && day > 30) { day = 1; mIdx = 6; } 
+            if (mIdx === 6 && day > 31) { day = 1; mIdx = 7; } 
+        }
+        return { date: `${String(day).padStart(2,'0')}-${monthNames[mIdx]}-${year}`, time: `${String(h).padStart(2,'0')}:${m}` };
+    }
+
+    let matches = rawMatches.map((m, i) => ({ id: `M${i+1}`, group: m[0], date: m[1], t1: m[2], t2: m[3], time: m[4], venue: m[5], isKO: false }));
+    
+    matches = matches.map(m => {
+        let pt = convertESTtoPT(m.date, m.time);
+        return { ...m, date: pt.date, time: pt.time };
+    });
+    
+    let koMatches = koMatchesRaw.map(m => {
+        let pt = convertESTtoPT(m.date, m.time);
+        return { ...m, date: pt.date, time: pt.time, isKO: true };
     });
 
     let allMatches = [...matches, ...koMatches];
@@ -275,12 +271,6 @@
         let matchDate = new Date(matchIso);
         let now = new Date();
         return now >= matchDate;
-    };
-
-    window.isGroupStageFinished = function() {
-        let lastGroupMatch = matches.find(m => m.id === 'M72');
-        if (!lastGroupMatch) return false;
-        return window.isMatchStarted(lastGroupMatch.date, lastGroupMatch.time);
     };
 
     get(dbRef).then((snap) => {
@@ -364,22 +354,29 @@
     window.updateDropdownNames = function() {
         const selStandings = document.getElementById('standings-view-select');
         const selUser = document.getElementById('user-selector');
-        let isGSFinished = window.isGroupStageFinished();
         
-        ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => {
-            let n = document.getElementById(`${p}-name`).value;
-            if(selStandings) {
-                selStandings.options[i+1].text = "👁️ Previsão: " + n;
-                if (!isGSFinished && window.currentUser !== 'admin' && window.currentUser !== p) {
-                    selStandings.options[i+1].disabled = true;
-                    selStandings.options[i+1].style.display = 'none';
-                } else {
-                    selStandings.options[i+1].disabled = false;
-                    selStandings.options[i+1].style.display = 'block';
+        if (selStandings) {
+            let currentVal = selStandings.value;
+            selStandings.innerHTML = '<option value="actual">📊 Realidade</option>';
+            ['p1', 'p2', 'p3', 'p4'].forEach((p) => {
+                let n = document.getElementById(`${p}-name`).value;
+                if (window.currentUser === p) {
+                    selStandings.innerHTML += `<option value="${p}">👁️ Previsão: ${n}</option>`;
                 }
+            });
+            if (selStandings.querySelector(`option[value="${currentVal}"]`)) {
+                selStandings.value = currentVal;
+            } else {
+                selStandings.value = 'actual';
             }
-            if(selUser) selUser.options[i+2].text = n;
-        });
+        }
+        
+        if (selUser) {
+            ['p1', 'p2', 'p3', 'p4'].forEach((p, i) => {
+                let n = document.getElementById(`${p}-name`).value;
+                selUser.options[i+2].text = n;
+            });
+        }
     }
 
     window.renderApp = function() {
@@ -451,12 +448,6 @@
     window.renderGroups = () => {
         actualStandings = getStandings(state.actual);
         let src = document.getElementById('standings-view-select').value;
-        
-        if (src !== 'actual' && !window.isGroupStageFinished() && window.currentUser !== 'admin' && window.currentUser !== src) {
-            document.getElementById('standings-view-select').value = 'actual';
-            src = 'actual';
-        }
-        
         let st = src === 'actual' ? actualStandings : getStandings(state.preds[src]);
         const container = document.getElementById('groups-container');
         container.innerHTML = '';
@@ -497,7 +488,7 @@
         let t2 = m.isKO ? resolve(m.t2_ref) : m.t2;
         let t1Class = t1.includes("(") ? "team-name tbd" : "team-name";
         let t2Class = t2.includes("(") ? "team-name away tbd" : "team-name away";
-        let matchHeader = m.isKO ? `${m.date} | ${m.time} (Hora PT) | ID: ${m.id}` : `Grupo ${m.group} | ${m.date} | ${m.time} (Hora PT)`;
+        let matchHeader = m.isKO ? `${m.date} | ${m.time} PT | ID: ${m.id}` : `Grupo ${m.group} | ${m.date} | ${m.time} PT`;
         
         let act = state.actual[m.id] || {g1:"", g2:"", adv:""};
         let isTie = m.isKO && act.g1 !== "" && act.g1 === act.g2;
@@ -521,44 +512,47 @@
             ${isTie && act.adv ? `<div style="font-size:10px; background:#d4edda; padding:2px; border-radius:3px; margin-top:2px;">P: ${act.adv=='t1'?t1.substring(0,4):t2.substring(0,4)}</div>` : ''}`;
         }
 
-        let playersHtml = ['p1','p2','p3','p4'].map(p => {
-            let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
-            let pTie = m.isKO && pr.g1 !== "" && pr.g1 == pr.g2;
-            let ptsDetails = calcPtsDetails(m, p);
-            
-            let canEdit = (!started && window.currentUser === p);
-            let canView = (started || window.currentUser === p); 
-            
-            let predContent = '';
-            let pointsDisplay = '';
-
-            if (canEdit) {
-                predContent = `
-                <div class="score-inputs">
-                    <input type="number" onchange="window.upP('${p}','${m.id}','g1',this.value)" value="${pr.g1}"> - 
-                    <input type="number" onchange="window.upP('${p}','${m.id}','g2',this.value)" value="${pr.g2}">
-                </div>
-                ${pTie?`<select class="adv-select" onchange="window.upP('${p}','${m.id}','adv',this.value)">
-                    <option value="">Quem Passa?</option>
-                    <option value="t1" ${pr.adv=='t1'?'selected':''}>Equipa 1</option>
-                    <option value="t2" ${pr.adv=='t2'?'selected':''}>Equipa 2</option>
-                </select>`:''}`;
-            } else if (canView) {
-                predContent = `<div style="font-size:15px; padding: 5px; background: #eee; border-radius:4px; width:100%; text-align:center;"><b>${pr.g1!==""?pr.g1:'-'}</b> - <b>${pr.g2!==""?pr.g2:'-'}</b></div>
-                ${pTie && pr.adv ? `<div style="font-size:10px; color:#555; margin-top:2px; text-align:center;">P: ${pr.adv=='t1'?'Eq.1':'Eq.2'}</div>` : ''}`;
-                pointsDisplay = `<div class="points-awarded">${ptsDetails.pts} pts${ptsDetails.pts > 0 ? `<br><span style="font-weight:normal; font-size:9px; color:#666;">(${ptsDetails.lbl})</span>` : ''}</div>`;
+        let playersHtml = '';
+        
+        if (!started) {
+            if (window.currentUser === 'admin' || window.currentUser === 'spectator') {
+                playersHtml = `<div style="grid-column: span 2; text-align: center; font-size: 13px; color: #888; padding: 10px; font-style: italic;">🔒 Apostas fechadas a aguardar início do jogo</div>`;
             } else {
-                let hasBet = pr.g1 !== "" && pr.g2 !== "";
-                predContent = `<div style="font-size:12px; padding:8px 2px; text-align:center; color:${hasBet?'#28a745':'#888'}; font-weight:bold; background:#f8f9fa; border:1px dashed #ccc; border-radius:4px; width:100%;">${hasBet ? '✅ Apostou' : '⏳ Em falta'}</div>`;
+                let p = window.currentUser;
+                let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
+                let pTie = m.isKO && pr.g1 !== "" && pr.g1 == pr.g2;
+                playersHtml = `
+                <div class="player-pred" style="grid-column: span 2; background: #eef2f5; border-color:#0056b3;">
+                    <span style="color:#0056b3;">A TUA APOSTA</span>
+                    <div class="score-inputs">
+                        <input type="number" onchange="window.upP('${p}','${m.id}','g1',this.value)" value="${pr.g1}"> - 
+                        <input type="number" onchange="window.upP('${p}','${m.id}','g2',this.value)" value="${pr.g2}">
+                    </div>
+                    ${pTie?`<select class="adv-select" onchange="window.upP('${p}','${m.id}','adv',this.value)">
+                        <option value="">Quem Passa?</option>
+                        <option value="t1" ${pr.adv=='t1'?'selected':''}>Equipa 1</option>
+                        <option value="t2" ${pr.adv=='t2'?'selected':''}>Equipa 2</option>
+                    </select>`:''}
+                </div>`;
             }
+        } else {
+            playersHtml = ['p1','p2','p3','p4'].map(p => {
+                let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
+                let pTie = m.isKO && pr.g1 !== "" && pr.g1 == pr.g2;
+                let ptsDetails = calcPtsDetails(m, p);
+                
+                let predContent = `<div style="font-size:15px; padding: 5px; background: #eee; border-radius:4px; width:100%; text-align:center;"><b>${pr.g1!==""?pr.g1:'-'}</b> - <b>${pr.g2!==""?pr.g2:'-'}</b></div>
+                ${pTie && pr.adv ? `<div style="font-size:10px; color:#555; margin-top:2px; text-align:center;">P: ${pr.adv=='t1'?'Eq.1':'Eq.2'}</div>` : ''}`;
+                
+                let pointsDisplay = `<div class="points-awarded">${ptsDetails.pts} pts${ptsDetails.pts > 0 ? `<br><span style="font-weight:normal; font-size:9px; color:#666;">(${ptsDetails.lbl})</span>` : ''}</div>`;
 
-            return `
-            <div class="player-pred" ${canEdit ? 'style="border: 2px solid #0056b3; background:#eef2f5;"' : ''}>
-                <span ${canEdit ? 'style="color:#0056b3;"' : ''}>${document.getElementById(p+'-name').value}</span>
-                ${predContent}
-                ${pointsDisplay}
-            </div>`;
-        }).join('');
+                return `<div class="player-pred">
+                    <span>${document.getElementById(p+'-name').value}</span>
+                    ${predContent}
+                    ${pointsDisplay}
+                </div>`;
+            }).join('');
+        }
 
         return `<div class="match-card">
             <div class="match-header">${matchHeader}</div>
@@ -570,7 +564,7 @@
                 </div>
                 <div class="${t2Class}">${t2}</div>
             </div>
-            <div class="predictions-section">
+            <div class="predictions-section ${(!started && (window.currentUser!=='admin' && window.currentUser!=='spectator')) ? 'single-focus' : ''}">
                 ${playersHtml}
             </div>
         </div>`;
@@ -626,14 +620,18 @@
             'Semi-finals': 'Meias', 'Third Place': '3º L.', 'Final': 'Final'
         };
 
+        // ALTERAÇÃO: Mestre Ronda só calcula e exibe se TODOS os jogos da ronda correspondente estiverem finalizados
         [...new Set(koMatches.map(m=>m.phase))].forEach(ph => {
-            let sc = {p1:0, p2:0, p3:0, p4:0}, rCount = 0;
-            koMatches.filter(m=>m.phase==ph).forEach(m => {
-                let act = state.actual[m.id]; if(!act || act.g1==="" || act.g2==="") return;
-                let aA = act.g1>act.g2 ? 't1' : (act.g1<act.g2 ? 't2' : act.adv); if(!aA) return; rCount++;
-                ['p1','p2','p3','p4'].forEach(p => { let pr = state.preds[p][m.id]; if(pr && (pr.g1>pr.g2?'t1':(pr.g1<pr.g2?'t2':pr.adv)) == aA) sc[p]++; });
-            });
-            if(rCount > 0) {
+            let sc = {p1:0, p2:0, p3:0, p4:0};
+            let inPhase = koMatches.filter(m=>m.phase==ph);
+            let phaseFinished = inPhase.every(m => state.actual[m.id] && state.actual[m.id].g1 !== "" && state.actual[m.id].g2 !== "");
+            
+            if (phaseFinished && inPhase.length > 0) {
+                inPhase.forEach(m => {
+                    let act = state.actual[m.id];
+                    let aA = act.g1>act.g2 ? 't1' : (act.g1<act.g2 ? 't2' : act.adv); if(!aA) return;
+                    ['p1','p2','p3','p4'].forEach(p => { let pr = state.preds[p][m.id]; if(pr && (pr.g1>pr.g2?'t1':(pr.g1<pr.g2?'t2':pr.adv)) == aA) sc[p]++; });
+                });
                 let uSc = [...new Set(Object.values(sc))].sort((a,b)=>b-a);
                 ['p1','p2','p3','p4'].forEach(p => { 
                     if(sc[p]==uSc[0] && uSc[0]>0) { koB[p]+=CONFIG.KO_EXTRA_1ST; koBDetails[p].push(`${phaseNames[ph]}: 1º`); }
@@ -641,6 +639,8 @@
                 });
             }
         });
+
+        let groupStageFinished = matches.every(m => state.actual[m.id] && state.actual[m.id].g1 !== "" && state.actual[m.id].g2 !== "");
 
         let stats = ['p1','p2','p3','p4'].map(p => {
             let gs=0, ko=0; 
@@ -661,47 +661,52 @@
 
             let pS = getStandings(state.preds[p]), pQ = getQ(pS), b=0;
             let bDet = {w:0, r:0, b3:0, q:0};
-            for(let g in groups) { 
-                if(actualStandings[g][0].p>0 && pS[g][0].name==actualStandings[g][0].name) { b+=CONFIG.BONUS_WINNER; bDet.w++; }
-                if(actualStandings[g][1].p>0 && pS[g][1].name==actualStandings[g][1].name) { b+=CONFIG.BONUS_RUNNERUP; bDet.r++; }
-            }
-            pQ.t8.forEach(t => { if(aQ.t8.includes(t)) { b+=CONFIG.BONUS_BEST3RD; bDet.b3++; } });
-            pQ.all.forEach(t => { if(aQ.all.includes(t)) { b+=CONFIG.BONUS_QUALIFIED; bDet.q++; } });
+            let bStr = '-';
             
-            let bStr = `1ºs: ${bDet.w}x | 2ºs: ${bDet.r}x<br>Melhor 3º: ${bDet.b3}x | Apur: ${bDet.q}x`;
+            // Só ativa o bónus quando a fase de grupos terminar na totalidade
+            if (groupStageFinished) {
+                for(let g in groups) { 
+                    if(actualStandings[g][0].p>0 && pS[g][0].name==actualStandings[g][0].name) { b+=CONFIG.BONUS_WINNER; bDet.w++; }
+                    if(actualStandings[g][1].p>0 && pS[g][1].name==actualStandings[g][1].name) { b+=CONFIG.BONUS_RUNNERUP; bDet.r++; }
+                }
+                pQ.t8.forEach(t => { if(aQ.t8.includes(t)) { b+=CONFIG.BONUS_BEST3RD; bDet.b3++; } });
+                pQ.all.forEach(t => { if(aQ.all.includes(t)) { b+=CONFIG.BONUS_QUALIFIED; bDet.q++; } });
+                bStr = `1ºs: ${bDet.w}x | 2ºs: ${bDet.r}x<br>Melhor 3º: ${bDet.b3}x | Apur: ${bDet.q}x`;
+            }
+            
+            let extraStr = koBDetails[p].join('<br>') || '-';
+            
+            // ALTERAÇÃO: O total passa a ser estritamente a soma dos pontos visíveis (b e koB[p] só somam se estiverem revelados)
+            let tot = gs + b + ko + koB[p];
 
             return { 
-                id: p,
                 n: document.getElementById(p+'-name').value, 
                 gs, 
                 b, bStr, 
                 ko, koStr, 
-                extra: koB[p], extraStr: koBDetails[p].join('<br>') || '-', 
-                tot: gs+b+ko+koB[p] 
+                extra: koB[p], extraStr, 
+                tot 
             };
         }).sort((a,b) => b.tot - a.tot);
 
-        let isGSFinished = window.isGroupStageFinished();
-
-        document.getElementById('leaderboard-body').innerHTML = stats.map((s,i) => {
-            let showPoints = isGSFinished || window.currentUser === 'admin' || window.currentUser === s.id;
-            
-            return `<tr>
-                <td>${i+1}º</td>
-                <td>${s.n}</td>
-                <td style="font-size:16px; color:#d9534f;"><b>${showPoints ? s.tot : '-'}</b></td>
-                <td>${showPoints ? s.gs : '-'}</td>
-                <td>
-                    ${showPoints ? `<b style="color:green;">+${s.b}</b><div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.bStr}</div>` : '-'}
-                </td>
-                <td>
-                    ${showPoints ? `${s.ko}<div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.koStr}</div>` : '-'}
-                </td>
-                <td>
-                    ${showPoints ? `<b style="color:green;">+${s.extra}</b><div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.extraStr}</div>` : '-'}
-                </td>
-            </tr>`;
-        }).join('');
+        document.getElementById('leaderboard-body').innerHTML = stats.map((s,i) => `<tr>
+            <td>${i+1}º</td>
+            <td>${s.n}</td>
+            <td style="font-size:16px; color:#d9534f;"><b>${s.tot}</b></td>
+            <td>${s.gs}</td>
+            <td>
+                <b style="color:green;">+${s.b}</b>
+                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.bStr}</div>
+            </td>
+            <td>
+                ${s.ko}
+                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.koStr}</div>
+            </td>
+            <td>
+                <b style="color:green;">+${s.extra}</b>
+                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.extraStr}</div>
+            </td>
+        </tr>`).join('');
     }
 </script>
 
