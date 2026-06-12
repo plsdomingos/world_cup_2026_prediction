@@ -54,6 +54,7 @@
         select.adv-select { font-size: 10px; padding: 2px; margin-top: 5px; width: 100%; max-width: 80px; background: #d4edda; border-color: #28a745; text-align: center;}
         
         .predictions-section { margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .predictions-section.single-focus { grid-template-columns: 1fr; justify-items: center; } 
         
         .player-pred { display: flex; flex-direction: column; align-items: center; font-size: 12px; background: #fdfdfd; padding: 8px; border-radius: 6px; border: 1px solid #f0f0f0; transition: border 0.3s;}
         .player-pred > span { font-weight: bold; margin-bottom: 4px; color: #333; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
@@ -516,7 +517,16 @@
         
         if (!started) {
             if (window.currentUser === 'admin' || window.currentUser === 'spectator') {
-                playersHtml = `<div style="grid-column: span 2; text-align: center; font-size: 13px; color: #888; padding: 10px; font-style: italic;">🔒 Apostas fechadas a aguardar início do jogo</div>`;
+                playersHtml = ['p1','p2','p3','p4'].map(p => {
+                    let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
+                    let hasBet = pr.g1 !== "" && pr.g2 !== "";
+                    let predContent = `<div style="font-size:12px; padding:8px 2px; text-align:center; color:${hasBet?'#28a745':'#888'}; font-weight:bold; background:#f8f9fa; border:1px dashed #ccc; border-radius:4px; width:100%;">${hasBet ? '✅ Apostou' : '⏳ Em falta'}</div>`;
+                    
+                    return `<div class="player-pred">
+                        <span>${document.getElementById(p+'-name').value}</span>
+                        ${predContent}
+                    </div>`;
+                }).join('');
             } else {
                 let p = window.currentUser;
                 let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
@@ -620,7 +630,6 @@
             'Semi-finals': 'Meias', 'Third Place': '3º L.', 'Final': 'Final'
         };
 
-        // ALTERAÇÃO: Mestre Ronda só calcula e exibe se TODOS os jogos da ronda correspondente estiverem finalizados
         [...new Set(koMatches.map(m=>m.phase))].forEach(ph => {
             let sc = {p1:0, p2:0, p3:0, p4:0};
             let inPhase = koMatches.filter(m=>m.phase==ph);
@@ -663,7 +672,6 @@
             let bDet = {w:0, r:0, b3:0, q:0};
             let bStr = '-';
             
-            // Só ativa o bónus quando a fase de grupos terminar na totalidade
             if (groupStageFinished) {
                 for(let g in groups) { 
                     if(actualStandings[g][0].p>0 && pS[g][0].name==actualStandings[g][0].name) { b+=CONFIG.BONUS_WINNER; bDet.w++; }
@@ -676,7 +684,6 @@
             
             let extraStr = koBDetails[p].join('<br>') || '-';
             
-            // ALTERAÇÃO: O total passa a ser estritamente a soma dos pontos visíveis (b e koB[p] só somam se estiverem revelados)
             let tot = gs + b + ko + koB[p];
 
             return { 
