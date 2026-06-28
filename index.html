@@ -54,7 +54,6 @@
         select.adv-select { font-size: 10px; padding: 2px; margin-top: 5px; width: 100%; max-width: 80px; background: #d4edda; border-color: #28a745; text-align: center;}
         
         .predictions-section { margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .predictions-section.single-focus { grid-template-columns: 1fr; justify-items: center; } 
         
         .player-pred { display: flex; flex-direction: column; align-items: center; font-size: 12px; background: #fdfdfd; padding: 8px; border-radius: 6px; border: 1px solid #f0f0f0; transition: border 0.3s;}
         .player-pred > span { font-weight: bold; margin-bottom: 4px; color: #333; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
@@ -208,15 +207,24 @@
         ["K", "27-Jun-26", "Colombia", "Portugal", "19:30", "Hard Rock Stadium, Miami"], ["K", "27-Jun-26", "Congo DR", "Uzbekistan", "19:30", "Mercedes-Benz Stadium, Atlanta"]
     ];
 
+    // FIX BUG: Atualizar t2_ref para utilizar o formato 3_Grupo
     const koMatchesRaw = [
-        { id: 'M73', date: '28-Jun-26', time: '15:00', venue: 'SoFi Stadium, Los Angeles', t1_ref: '2A', t2_ref: '2B', phase: 'Round of 32' }, { id: 'M74', date: '29-Jun-26', time: '16:30', venue: 'Gillette Stadium, Boston', t1_ref: '1E', t2_ref: '3_0', phase: 'Round of 32' },
-        { id: 'M75', date: '29-Jun-26', time: '21:00', venue: 'Estadio BBVA, Monterrey', t1_ref: '1F', t2_ref: '2C', phase: 'Round of 32' }, { id: 'M76', date: '29-Jun-26', time: '13:00', venue: 'NRG Stadium, Houston', t1_ref: '1C', t2_ref: '2F', phase: 'Round of 32' },
-        { id: 'M77', date: '30-Jun-26', time: '17:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: '1I', t2_ref: '3_1', phase: 'Round of 32' }, { id: 'M78', date: '30-Jun-26', time: '13:00', venue: 'AT&T Stadium, Dallas', t1_ref: '2E', t2_ref: '2I', phase: 'Round of 32' },
-        { id: 'M79', date: '30-Jun-26', time: '21:00', venue: 'Estadio Azteca, Mexico City', t1_ref: '1A', t2_ref: '3_2', phase: 'Round of 32' }, { id: 'M80', date: '1-Jul-26', time: '12:00', venue: 'Mercedes-Benz Stadium, Atlanta', t1_ref: '1L', t2_ref: '3_3', phase: 'Round of 32' },
-        { id: 'M81', date: '1-Jul-26', time: '20:00', venue: "Levi's Stadium, San Francisco Bay Area", t1_ref: '1D', t2_ref: '3_4', phase: 'Round of 32' }, { id: 'M82', date: '1-Jul-26', time: '16:00', venue: 'Lumen Field, Seattle', t1_ref: '1G', t2_ref: '3_5', phase: 'Round of 32' },
-        { id: 'M83', date: '2-Jul-26', time: '19:00', venue: 'BMO Field, Toronto', t1_ref: '2K', t2_ref: '2L', phase: 'Round of 32' }, { id: 'M84', date: '2-Jul-26', time: '15:00', venue: 'SoFi Stadium, Los Angeles', t1_ref: '1H', t2_ref: '2J', phase: 'Round of 32' },
-        { id: 'M85', date: '2-Jul-26', time: '23:00', venue: 'BC Place, Vancouver', t1_ref: '1B', t2_ref: '3_6', phase: 'Round of 32' }, { id: 'M86', date: '3-Jul-26', time: '18:00', venue: 'Hard Rock Stadium, Miami', t1_ref: '1J', t2_ref: '2H', phase: 'Round of 32' },
-        { id: 'M87', date: '3-Jul-26', time: '21:30', venue: 'Arrowhead Stadium, Kansas City', t1_ref: '1K', t2_ref: '3_7', phase: 'Round of 32' }, { id: 'M88', date: '3-Jul-26', time: '14:00', venue: 'AT&T Stadium, Dallas', t1_ref: '2D', t2_ref: '2G', phase: 'Round of 32' },
+        { id: 'M73', date: '28-Jun-26', time: '15:00', venue: 'SoFi Stadium, Los Angeles', t1_ref: '2A', t2_ref: '2B', phase: 'Round of 32' }, 
+        { id: 'M74', date: '29-Jun-26', time: '16:30', venue: 'Gillette Stadium, Boston', t1_ref: '1E', t2_ref: '3_E', phase: 'Round of 32' },
+        { id: 'M75', date: '29-Jun-26', time: '21:00', venue: 'Estadio BBVA, Monterrey', t1_ref: '1F', t2_ref: '2C', phase: 'Round of 32' }, 
+        { id: 'M76', date: '29-Jun-26', time: '13:00', venue: 'NRG Stadium, Houston', t1_ref: '1C', t2_ref: '2F', phase: 'Round of 32' },
+        { id: 'M77', date: '30-Jun-26', time: '17:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: '1I', t2_ref: '3_I', phase: 'Round of 32' }, 
+        { id: 'M78', date: '30-Jun-26', time: '13:00', venue: 'AT&T Stadium, Dallas', t1_ref: '2E', t2_ref: '2I', phase: 'Round of 32' },
+        { id: 'M79', date: '30-Jun-26', time: '21:00', venue: 'Estadio Azteca, Mexico City', t1_ref: '1A', t2_ref: '3_A', phase: 'Round of 32' }, 
+        { id: 'M80', date: '1-Jul-26', time: '12:00', venue: 'Mercedes-Benz Stadium, Atlanta', t1_ref: '1L', t2_ref: '3_L', phase: 'Round of 32' },
+        { id: 'M81', date: '1-Jul-26', time: '20:00', venue: "Levi's Stadium, San Francisco Bay Area", t1_ref: '1D', t2_ref: '3_D', phase: 'Round of 32' }, 
+        { id: 'M82', date: '1-Jul-26', time: '16:00', venue: 'Lumen Field, Seattle', t1_ref: '1G', t2_ref: '3_G', phase: 'Round of 32' },
+        { id: 'M83', date: '2-Jul-26', time: '19:00', venue: 'BMO Field, Toronto', t1_ref: '2K', t2_ref: '2L', phase: 'Round of 32' }, 
+        { id: 'M84', date: '2-Jul-26', time: '15:00', venue: 'SoFi Stadium, Los Angeles', t1_ref: '1H', t2_ref: '2J', phase: 'Round of 32' },
+        { id: 'M85', date: '2-Jul-26', time: '23:00', venue: 'BC Place, Vancouver', t1_ref: '1B', t2_ref: '3_B', phase: 'Round of 32' }, 
+        { id: 'M86', date: '3-Jul-26', time: '18:00', venue: 'Hard Rock Stadium, Miami', t1_ref: '1J', t2_ref: '2H', phase: 'Round of 32' },
+        { id: 'M87', date: '3-Jul-26', time: '21:30', venue: 'Arrowhead Stadium, Kansas City', t1_ref: '1K', t2_ref: '3_K', phase: 'Round of 32' }, 
+        { id: 'M88', date: '3-Jul-26', time: '14:00', venue: 'AT&T Stadium, Dallas', t1_ref: '2D', t2_ref: '2G', phase: 'Round of 32' },
         { id: 'M89', date: '4-Jul-26', time: '17:00', venue: 'Lincoln Financial Field, Philadelphia', t1_ref: 'W74', t2_ref: 'W77', phase: 'Round of 16' }, { id: 'M90', date: '4-Jul-26', time: '13:00', venue: 'NRG Stadium, Houston', t1_ref: 'W73', t2_ref: 'W75', phase: 'Round of 16' },
         { id: 'M91', date: '5-Jul-26', time: '16:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: 'W76', t2_ref: 'W78', phase: 'Round of 16' }, { id: 'M92', date: '5-Jul-26', time: '20:00', venue: 'Estadio Azteca, Mexico City', t1_ref: 'W79', t2_ref: 'W80', phase: 'Round of 16' },
         { id: 'M93', date: '6-Jul-26', time: '15:00', venue: 'AT&T Stadium, Dallas', t1_ref: 'W83', t2_ref: 'W84', phase: 'Round of 16' }, { id: 'M94', date: '6-Jul-26', time: '20:00', venue: 'Lumen Field, Seattle', t1_ref: 'W81', t2_ref: 'W82', phase: 'Round of 16' },
@@ -356,12 +364,16 @@
         const selStandings = document.getElementById('standings-view-select');
         const selUser = document.getElementById('user-selector');
         
+        // Verifica se os 72 jogos da fase de grupos têm resultado real
+        let groupStageFinished = matches.every(m => state.actual[m.id] && state.actual[m.id].g1 !== "" && state.actual[m.id].g2 !== "");
+
         if (selStandings) {
             let currentVal = selStandings.value;
             selStandings.innerHTML = '<option value="actual">📊 Realidade</option>';
             ['p1', 'p2', 'p3', 'p4'].forEach((p) => {
                 let n = document.getElementById(`${p}-name`).value;
-                if (window.currentUser === p) {
+                // ALTERAÇÃO: Mostrar simulações se for o próprio, o admin ou se a fase de grupos já acabou
+                if (window.currentUser === p || window.currentUser === 'admin' || groupStageFinished) {
                     selStandings.innerHTML += `<option value="${p}">👁️ Previsão: ${n}</option>`;
                 }
             });
@@ -428,11 +440,30 @@
             return actualStandings[grp] && actualStandings[grp][pos].p > 0 ? actualStandings[grp][pos].name : `(${ref})`;
         }
         if (ref.startsWith('3_')) {
-            let t3 = []; for(let g in actualStandings) t3.push(actualStandings[g][2]);
-            t3.sort((a,b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+            let targetGrp = ref.split('_')[1];
+            let t3 = []; for(let g in actualStandings) t3.push({team: actualStandings[g][2], grp: g});
+            t3.sort((a,b) => b.team.pts - a.team.pts || b.team.gd - a.team.gd || b.team.gf - a.team.gf);
             let top8 = t3.slice(0,8);
-            let idx = parseInt(ref.split('_')[1]);
-            return top8[idx] && top8[idx].p > 0 ? top8[idx].name : "(Melhor 3º)";
+            
+            let map = {};
+            let slots = ['A', 'B', 'D', 'E', 'G', 'I', 'K', 'L'];
+            let used = {};
+            function solve(slotIdx) {
+                if(slotIdx === slots.length) return true;
+                let s = slots[slotIdx];
+                for(let i=0; i<8; i++) {
+                    if(!used[i] && top8[i] && top8[i].grp !== s) {
+                        used[i] = true; map[s] = top8[i].team;
+                        if(solve(slotIdx+1)) return true;
+                        used[i] = false;
+                    }
+                }
+                return false;
+            }
+            if(!solve(0)) {
+                for(let i=0; i<8; i++) if(top8[i]) map[slots[i]] = top8[i].team;
+            }
+            return map[targetGrp] && map[targetGrp].p > 0 ? map[targetGrp].name : "(Melhor 3º)";
         }
         if (ref.startsWith('W') || ref.startsWith('L')) {
             let pid = 'M' + ref.substring(1), act = state.actual[pid], info = koMatches.find(x => x.id === pid);
