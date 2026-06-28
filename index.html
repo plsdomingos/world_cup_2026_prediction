@@ -54,6 +54,7 @@
         select.adv-select { font-size: 10px; padding: 2px; margin-top: 5px; width: 100%; max-width: 80px; background: #d4edda; border-color: #28a745; text-align: center;}
         
         .predictions-section { margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .predictions-section.single-focus { grid-template-columns: 1fr; justify-items: center; } 
         
         .player-pred { display: flex; flex-direction: column; align-items: center; font-size: 12px; background: #fdfdfd; padding: 8px; border-radius: 6px; border: 1px solid #f0f0f0; transition: border 0.3s;}
         .player-pred > span { font-weight: bold; margin-bottom: 4px; color: #333; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
@@ -209,20 +210,20 @@
 
     const koMatchesRaw = [
         { id: 'M73', date: '28-Jun-26', time: '15:00', venue: 'SoFi Stadium, Los Angeles', t1_ref: '2A', t2_ref: '2B', phase: 'Round of 32' }, 
-        { id: 'M74', date: '29-Jun-26', time: '16:30', venue: 'Gillette Stadium, Boston', t1_ref: '1E', t2_ref: '3_vs_1E', phase: 'Round of 32' },
+        { id: 'M74', date: '29-Jun-26', time: '16:30', venue: 'Gillette Stadium, Boston', t1_ref: '1E', t2_ref: '3_E', phase: 'Round of 32' },
         { id: 'M75', date: '29-Jun-26', time: '21:00', venue: 'Estadio BBVA, Monterrey', t1_ref: '1F', t2_ref: '2C', phase: 'Round of 32' }, 
         { id: 'M76', date: '29-Jun-26', time: '13:00', venue: 'NRG Stadium, Houston', t1_ref: '1C', t2_ref: '2F', phase: 'Round of 32' },
-        { id: 'M77', date: '30-Jun-26', time: '17:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: '1I', t2_ref: '3_vs_1I', phase: 'Round of 32' }, 
+        { id: 'M77', date: '30-Jun-26', time: '17:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: '1I', t2_ref: '3_I', phase: 'Round of 32' }, 
         { id: 'M78', date: '30-Jun-26', time: '13:00', venue: 'AT&T Stadium, Dallas', t1_ref: '2E', t2_ref: '2I', phase: 'Round of 32' },
-        { id: 'M79', date: '30-Jun-26', time: '21:00', venue: 'Estadio Azteca, Mexico City', t1_ref: '1A', t2_ref: '3_vs_1A', phase: 'Round of 32' }, 
-        { id: 'M80', date: '1-Jul-26', time: '12:00', venue: 'Mercedes-Benz Stadium, Atlanta', t1_ref: '1L', t2_ref: '3_vs_1L', phase: 'Round of 32' },
-        { id: 'M81', date: '1-Jul-26', time: '20:00', venue: "Levi's Stadium, San Francisco Bay Area", t1_ref: '1D', t2_ref: '3_vs_1D', phase: 'Round of 32' }, 
-        { id: 'M82', date: '1-Jul-26', time: '16:00', venue: 'Lumen Field, Seattle', t1_ref: '1G', t2_ref: '3_vs_1G', phase: 'Round of 32' },
+        { id: 'M79', date: '30-Jun-26', time: '21:00', venue: 'Estadio Azteca, Mexico City', t1_ref: '1A', t2_ref: '3_A', phase: 'Round of 32' }, 
+        { id: 'M80', date: '1-Jul-26', time: '12:00', venue: 'Mercedes-Benz Stadium, Atlanta', t1_ref: '1L', t2_ref: '3_L', phase: 'Round of 32' },
+        { id: 'M81', date: '1-Jul-26', time: '20:00', venue: "Levi's Stadium, San Francisco Bay Area", t1_ref: '1D', t2_ref: '3_D', phase: 'Round of 32' }, 
+        { id: 'M82', date: '1-Jul-26', time: '16:00', venue: 'Lumen Field, Seattle', t1_ref: '1G', t2_ref: '3_G', phase: 'Round of 32' },
         { id: 'M83', date: '2-Jul-26', time: '19:00', venue: 'BMO Field, Toronto', t1_ref: '2K', t2_ref: '2L', phase: 'Round of 32' }, 
         { id: 'M84', date: '2-Jul-26', time: '15:00', venue: 'SoFi Stadium, Los Angeles', t1_ref: '1H', t2_ref: '2J', phase: 'Round of 32' },
-        { id: 'M85', date: '2-Jul-26', time: '23:00', venue: 'BC Place, Vancouver', t1_ref: '1B', t2_ref: '3_vs_1B', phase: 'Round of 32' }, 
+        { id: 'M85', date: '2-Jul-26', time: '23:00', venue: 'BC Place, Vancouver', t1_ref: '1B', t2_ref: '3_B', phase: 'Round of 32' }, 
         { id: 'M86', date: '3-Jul-26', time: '18:00', venue: 'Hard Rock Stadium, Miami', t1_ref: '1J', t2_ref: '2H', phase: 'Round of 32' },
-        { id: 'M87', date: '3-Jul-26', time: '21:30', venue: 'Arrowhead Stadium, Kansas City', t1_ref: '1K', t2_ref: '3_vs_1K', phase: 'Round of 32' }, 
+        { id: 'M87', date: '3-Jul-26', time: '21:30', venue: 'Arrowhead Stadium, Kansas City', t1_ref: '1K', t2_ref: '3_K', phase: 'Round of 32' }, 
         { id: 'M88', date: '3-Jul-26', time: '14:00', venue: 'AT&T Stadium, Dallas', t1_ref: '2D', t2_ref: '2G', phase: 'Round of 32' },
         { id: 'M89', date: '4-Jul-26', time: '17:00', venue: 'Lincoln Financial Field, Philadelphia', t1_ref: 'W74', t2_ref: 'W77', phase: 'Round of 16' }, { id: 'M90', date: '4-Jul-26', time: '13:00', venue: 'NRG Stadium, Houston', t1_ref: 'W73', t2_ref: 'W75', phase: 'Round of 16' },
         { id: 'M91', date: '5-Jul-26', time: '16:00', venue: 'MetLife Stadium, New York/New Jersey', t1_ref: 'W76', t2_ref: 'W78', phase: 'Round of 16' }, { id: 'M92', date: '5-Jul-26', time: '20:00', venue: 'Estadio Azteca, Mexico City', t1_ref: 'W79', t2_ref: 'W80', phase: 'Round of 16' },
@@ -436,10 +437,11 @@
             let pos = parseInt(ref[0]) - 1, grp = ref[1];
             return actualStandings[grp] && actualStandings[grp][pos].p > 0 ? actualStandings[grp][pos].name : `(${ref})`;
         }
-        if (ref.startsWith('3_vs_')) {
-            let hostGrp = ref.split('_')[2].replace('1', '');
+        if (ref.startsWith('3_')) {
+            let hostGrp = ref.split('_')[1];
             
-            let t3 = []; for(let g in actualStandings) t3.push({team: actualStandings[g][2], grp: g});
+            let t3 = []; 
+            for(let g in actualStandings) t3.push({team: actualStandings[g][2], grp: g});
             t3.sort((a,b) => b.team.pts - a.team.pts || b.team.gd - a.team.gd || b.team.gf - a.team.gf);
             let top8 = t3.slice(0,8);
             
@@ -447,13 +449,13 @@
             let hosts = ['A', 'B', 'D', 'E', 'G', 'I', 'K', 'L'];
             
             let prefs = {
-                'A': ['E', 'F', 'C', 'D', 'B', 'G', 'H', 'I', 'J', 'K', 'L'],
-                'B': ['J', 'K', 'L', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'A'],
+                'A': ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'B', 'C', 'D'],
+                'B': ['J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'K', 'L', 'A'],
                 'D': ['B', 'C', 'A', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'],
                 'E': ['D', 'C', 'B', 'A', 'F', 'G', 'H', 'I', 'J', 'K', 'L'],
-                'G': ['I', 'H', 'J', 'K', 'L', 'A', 'B', 'C', 'D', 'E', 'F'],
-                'I': ['F', 'G', 'E', 'H', 'J', 'K', 'L', 'A', 'B', 'C', 'D'],
-                'K': ['L', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'],
+                'G': ['I', 'J', 'K', 'L', 'H', 'F', 'E', 'D', 'C', 'B', 'A'],
+                'I': ['F', 'E', 'D', 'C', 'B', 'A', 'G', 'H', 'J', 'K', 'L'],
+                'K': ['L', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
                 'L': ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A']
             };
 
@@ -474,7 +476,8 @@
             }
             
             if(!solve(0)) {
-                for(let i=0; i<8; i++) if(top8[i]) map[hosts[i]] = top8[i].team;
+                let avail = top8.filter((_, i) => !used[i]);
+                for(let h of hosts) if(!map[h] && avail.length > 0) map[h] = avail.shift().team;
             }
             
             return map[hostGrp] && map[hostGrp].p > 0 ? map[hostGrp].name : "(Melhor 3º)";
@@ -554,4 +557,213 @@
                 <option value="t2" ${act.adv=='t2'?'selected':''}>${t2.substring(0,4)}</option>
             </select>`:''}`;
         } else {
-            actualHtml = `<div style="font-size:16px; font-weight:bold; padding: 2px;">${act
+            actualHtml = `<div style="font-size:16px; font-weight:bold; padding: 2px;">${act.g1!==""?act.g1:'-'} : ${act.g2!==""?act.g2:'-'}</div>
+            ${isTie && act.adv ? `<div style="font-size:10px; background:#d4edda; padding:2px; border-radius:3px; margin-top:2px;">P: ${act.adv=='t1'?t1.substring(0,4):t2.substring(0,4)}</div>` : ''}`;
+        }
+
+        let playersHtml = '';
+        
+        if (!started) {
+            if (window.currentUser === 'admin' || window.currentUser === 'spectator') {
+                playersHtml = ['p1','p2','p3','p4'].map(p => {
+                    let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
+                    let hasBet = pr.g1 !== "" && pr.g2 !== "";
+                    let predContent = `<div style="font-size:12px; padding:8px 2px; text-align:center; color:${hasBet?'#28a745':'#888'}; font-weight:bold; background:#f8f9fa; border:1px dashed #ccc; border-radius:4px; width:100%;">${hasBet ? '✅ Apostou' : '⏳ Em falta'}</div>`;
+                    
+                    return `<div class="player-pred">
+                        <span>${document.getElementById(p+'-name').value}</span>
+                        ${predContent}
+                    </div>`;
+                }).join('');
+            } else {
+                let p = window.currentUser;
+                let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
+                let pTie = m.isKO && pr.g1 !== "" && pr.g1 == pr.g2;
+                playersHtml = `
+                <div class="player-pred" style="grid-column: span 2; background: #eef2f5; border-color:#0056b3;">
+                    <span style="color:#0056b3;">A TUA APOSTA</span>
+                    <div class="score-inputs">
+                        <input type="number" onchange="window.upP('${p}','${m.id}','g1',this.value)" value="${pr.g1}"> - 
+                        <input type="number" onchange="window.upP('${p}','${m.id}','g2',this.value)" value="${pr.g2}">
+                    </div>
+                    ${pTie?`<select class="adv-select" onchange="window.upP('${p}','${m.id}','adv',this.value)">
+                        <option value="">Quem Passa?</option>
+                        <option value="t1" ${pr.adv=='t1'?'selected':''}>Equipa 1</option>
+                        <option value="t2" ${pr.adv=='t2'?'selected':''}>Equipa 2</option>
+                    </select>`:''}
+                </div>`;
+            }
+        } else {
+            playersHtml = ['p1','p2','p3','p4'].map(p => {
+                let pr = state.preds[p][m.id] || {g1:"",g2:"",adv:""};
+                let pTie = m.isKO && pr.g1 !== "" && pr.g1 == pr.g2;
+                let ptsDetails = calcPtsDetails(m, p);
+                
+                let predContent = `<div style="font-size:15px; padding: 5px; background: #eee; border-radius:4px; width:100%; text-align:center;"><b>${pr.g1!==""?pr.g1:'-'}</b> - <b>${pr.g2!==""?pr.g2:'-'}</b></div>
+                ${pTie && pr.adv ? `<div style="font-size:10px; color:#555; margin-top:2px; text-align:center;">P: ${pr.adv=='t1'?'Eq.1':'Eq.2'}</div>` : ''}`;
+                
+                let pointsDisplay = `<div class="points-awarded">${ptsDetails.pts} pts${ptsDetails.pts > 0 ? `<br><span style="font-weight:normal; font-size:9px; color:#666;">(${ptsDetails.lbl})</span>` : ''}</div>`;
+
+                return `<div class="player-pred">
+                    <span>${document.getElementById(p+'-name').value}</span>
+                    ${predContent}
+                    ${pointsDisplay}
+                </div>`;
+            }).join('');
+        }
+
+        return `<div class="match-card">
+            <div class="match-header">${matchHeader}</div>
+            <div class="match-main">
+                <div class="${t1Class}">${t1}</div>
+                <div class="actual-score-box">
+                    <small>REAL</small>
+                    ${actualHtml}
+                </div>
+                <div class="${t2Class}">${t2}</div>
+            </div>
+            <div class="predictions-section ${(!started && (window.currentUser!=='admin' && window.currentUser!=='spectator')) ? 'single-focus' : ''}">
+                ${playersHtml}
+            </div>
+        </div>`;
+    }
+
+    window.renderMatches = function() {
+        const c = document.getElementById('matches-container'); c.innerHTML = '';
+        let groupsD = {}; matches.forEach(m => { if(!groupsD[m.date]) groupsD[m.date] = []; groupsD[m.date].push(m); });
+        for(let d in groupsD) {
+            let id = d.replace(/\//g,'-');
+            c.innerHTML += `<div class="collapsible-header" onclick="window.toggleSection('date-${id}')">📅 ${d}</div><div id="date-${id}" class="collapsible-content">${groupsD[d].map(matchHTML).join('')}</div>`;
+        }
+    }
+
+    window.renderKnockouts = function() {
+        const c = document.getElementById('knockouts-container'); c.innerHTML = '';
+        let groupsP = {}; koMatches.forEach(m => { if(!groupsP[m.phase]) groupsP[m.phase] = []; groupsP[m.phase].push(m); });
+        for(let p in groupsP) {
+            let id = p.replace(/\s/g,'-');
+            c.innerHTML += `<div class="collapsible-header ${p.includes('Final')?'final-header':''}" onclick="window.toggleSection('phase-${id}')">🏆 ${p}</div><div id="phase-${id}" class="collapsible-content">${groupsP[p].map(matchHTML).join('')}</div>`;
+        }
+    }
+
+    window.upA = (id, k, v) => { 
+        if(!state.actual[id]) state.actual[id]={g1:"",g2:"",adv:""}; 
+        state.actual[id][k]=v; 
+        if (state.actual[id].g1 !== state.actual[id].g2) state.actual[id].adv = ""; 
+        window.autoSave();
+        window.renderApp(); 
+    }
+    
+    window.upP = (p, id, k, v) => { 
+        if(!state.preds[p][id]) state.preds[p][id]={g1:"",g2:"",adv:""}; 
+        state.preds[p][id][k]=v; 
+        window.autoSave();
+        
+        if(parseInt(id.replace('M','')) <= 72) {
+            window.renderMatches();
+            if(document.getElementById('standings-view-select').value === p) window.renderGroups();
+        } else {
+            window.renderKnockouts();
+        }
+        window.updateLeaderboard(); 
+    }
+
+    window.updateLeaderboard = function() {
+        actualStandings = getStandings(state.actual); let aQ = getQ(actualStandings);
+        let koB = {p1:0, p2:0, p3:0, p4:0};
+        let koBDetails = {p1:[], p2:[], p3:[], p4:[]};
+        
+        let phaseNames = {
+            'Round of 32': '16avos', 'Round of 16': 'Oitavos', 'Quarter-finals': 'Quartos',
+            'Semi-finals': 'Meias', 'Third Place': '3º L.', 'Final': 'Final'
+        };
+
+        [...new Set(koMatches.map(m=>m.phase))].forEach(ph => {
+            let sc = {p1:0, p2:0, p3:0, p4:0};
+            let inPhase = koMatches.filter(m=>m.phase==ph);
+            let phaseFinished = inPhase.every(m => state.actual[m.id] && state.actual[m.id].g1 !== "" && state.actual[m.id].g2 !== "");
+            
+            if (phaseFinished && inPhase.length > 0) {
+                inPhase.forEach(m => {
+                    let act = state.actual[m.id];
+                    let aA = act.g1>act.g2 ? 't1' : (act.g1<act.g2 ? 't2' : act.adv); if(!aA) return;
+                    ['p1','p2','p3','p4'].forEach(p => { let pr = state.preds[p][m.id]; if(pr && (pr.g1>pr.g2?'t1':(pr.g1<pr.g2?'t2':pr.adv)) == aA) sc[p]++; });
+                });
+                let uSc = [...new Set(Object.values(sc))].sort((a,b)=>b-a);
+                ['p1','p2','p3','p4'].forEach(p => { 
+                    if(sc[p]==uSc[0] && uSc[0]>0) { koB[p]+=CONFIG.KO_EXTRA_1ST; koBDetails[p].push(`${phaseNames[ph]}: 1º`); }
+                    else if(sc[p]==uSc[1] && uSc[1]>0) { koB[p]+=CONFIG.KO_EXTRA_2ND; koBDetails[p].push(`${phaseNames[ph]}: 2º`); }
+                });
+            }
+        });
+
+        let groupStageFinished = matches.every(m => state.actual[m.id] && state.actual[m.id].g1 !== "" && state.actual[m.id].g2 !== "");
+
+        let stats = ['p1','p2','p3','p4'].map(p => {
+            let gs=0, ko=0; 
+            let koPhasePts = {};
+            
+            matches.forEach(m=>gs+=calcPts(m,p)); 
+            
+            koMatches.forEach(m=>{
+                let pts = calcPts(m,p);
+                ko+=pts;
+                if(pts > 0) {
+                    if(!koPhasePts[m.phase]) koPhasePts[m.phase] = 0;
+                    koPhasePts[m.phase] += pts;
+                }
+            });
+            
+            let koStr = Object.entries(koPhasePts).map(([k,v]) => `${phaseNames[k]}: ${v}`).join('<br>') || '-';
+
+            let pS = getStandings(state.preds[p]), pQ = getQ(pS), b=0;
+            let bDet = {w:0, r:0, b3:0, q:0};
+            let bStr = '-';
+            
+            if (groupStageFinished) {
+                for(let g in groups) { 
+                    if(actualStandings[g][0].p>0 && pS[g][0].name==actualStandings[g][0].name) { b+=CONFIG.BONUS_WINNER; bDet.w++; }
+                    if(actualStandings[g][1].p>0 && pS[g][1].name==actualStandings[g][1].name) { b+=CONFIG.BONUS_RUNNERUP; bDet.r++; }
+                }
+                pQ.t8.forEach(t => { if(aQ.t8.includes(t)) { b+=CONFIG.BONUS_BEST3RD; bDet.b3++; } });
+                pQ.all.forEach(t => { if(aQ.all.includes(t)) { b+=CONFIG.BONUS_QUALIFIED; bDet.q++; } });
+                bStr = `1ºs: ${bDet.w}x | 2ºs: ${bDet.r}x<br>Melhor 3º: ${bDet.b3}x | Apur: ${bDet.q}x`;
+            }
+            
+            let extraStr = koBDetails[p].join('<br>') || '-';
+            
+            let tot = gs + b + ko + koB[p];
+
+            return { 
+                n: document.getElementById(p+'-name').value, 
+                gs, 
+                b, bStr, 
+                ko, koStr, 
+                extra: koB[p], extraStr, 
+                tot 
+            };
+        }).sort((a,b) => b.tot - a.tot);
+
+        document.getElementById('leaderboard-body').innerHTML = stats.map((s,i) => `<tr>
+            <td>${i+1}º</td>
+            <td>${s.n}</td>
+            <td style="font-size:16px; color:#d9534f;"><b>${s.tot}</b></td>
+            <td>${s.gs}</td>
+            <td>
+                <b style="color:green;">+${s.b}</b>
+                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.bStr}</div>
+            </td>
+            <td>
+                ${s.ko}
+                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.koStr}</div>
+            </td>
+            <td>
+                <b style="color:green;">+${s.extra}</b>
+                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.2;">${s.extraStr}</div>
+            </td>
+        </tr>`).join('');
+    }
+</script>
+
+</body>
+</html>
